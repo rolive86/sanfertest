@@ -1,0 +1,2266 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Back Office — Test de Manejo | San Fernando</title>
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/sanfer-isotipo.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* ── LIGHT MODE — San Fernando Municipio (fondo blanco, azul + naranja) ── */
+:root{
+  --bg:       #ffffff;
+  --bg2:      #ffffff;
+  --bg3:      #f3f8fc;
+  --border:   #e2eaf2;
+  --border2:  #c5d4e4;
+  --text:     #181008;
+  --text2:    #4a5568;
+  --text3:    #7a8494;
+  --accent:   #0088C8;
+  --accent2:  #2868A8;
+  --orange:   #E89000;
+  --green:    #00a844;
+  --red:      #d62b4a;
+  --yellow:   #E89000;
+  --r:        10px;
+  --r-sm:     6px;
+  --topbar-bg:#ffffff;
+  --topbar-fg:#2868A8;
+  --topbar-sub:#5a6a80;
+  --topbar-pill-bg:#eef5fa;
+  --topbar-pill-border:#d4e2ee;
+  --topbar-pill-fg:#4a5568;
+}
+
+/* ── DARK MODE (opcional) ── */
+[data-theme="dark"]{
+  --bg:       #0f1117;
+  --bg2:      #171923;
+  --bg3:      #1e2130;
+  --border:   #2a2f45;
+  --border2:  #3a405a;
+  --text:     #e8eaf0;
+  --text2:    #8b91a8;
+  --text3:    #5a6080;
+  --accent:   #40A0D8;
+  --accent2:  #9dc8ff;
+  --green:    #00c853;
+  --red:      #ff3b5c;
+  --yellow:   #E89000;
+  --orange:   #E09030;
+  --topbar-bg:#12151f;
+  --topbar-fg:#ffffff;
+  --topbar-sub:rgba(255,255,255,.65);
+  --topbar-pill-bg:rgba(255,255,255,.1);
+  --topbar-pill-border:rgba(255,255,255,.22);
+  --topbar-pill-fg:rgba(255,255,255,.88);
+}
+html,body{height:100%}
+html{font-size:15px}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  transition:background .3s,color .3s;
+}
+
+/* ── TOPBAR ── */
+.topbar{
+  background:var(--topbar-bg);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;
+  height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;position:sticky;top:0;z-index:50;
+  transition:background .3s;
+}
+.topbar-logo{
+  display:flex;align-items:center;gap:10px;
+  font-weight:700;font-size:15px;color:var(--topbar-fg);
+  letter-spacing:-.3px;
+}
+.topbar-sub{font-size:10px;color:var(--topbar-sub);font-weight:400;line-height:1.2}
+.topbar-logo-img{height:40px;width:auto;margin-right:4px;display:block}
+.theme-toggle{
+  background:transparent;border:1px solid var(--topbar-pill-border);
+  color:var(--topbar-pill-fg);border-radius:20px;
+  padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600;
+  font-family:'DM Sans',sans-serif;transition:all .2s;
+  display:flex;align-items:center;gap:6px;
+}
+.theme-toggle:hover{border-color:var(--accent);color:var(--accent)}
+.topbar-logo-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--accent);
+}
+.topbar-stats{
+  display:flex;align-items:center;gap:16px;
+}
+.stat-pill{
+  display:flex;align-items:center;gap:6px;
+  background:var(--topbar-pill-bg);
+  border:1px solid var(--topbar-pill-border);
+  border-radius:100px;
+  padding:4px 12px;
+  font-size:12px;font-weight:600;color:var(--topbar-pill-fg);
+}
+.stat-pill span{color:var(--accent);font-family:'DM Mono',monospace}
+
+/* ── LAYOUT ── */
+.layout{display:flex;flex:1;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:260px;flex-shrink:0;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.sidebar-header{
+  padding:16px;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.search-wrap{position:relative}
+.search-input{
+  width:100%;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  padding:8px 10px 8px 32px;
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;
+  outline:none;
+}
+.search-input:focus{border-color:var(--accent)}
+.search-icon{
+  position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  color:var(--text3);font-size:13px;pointer-events:none;
+}
+.filter-row{
+  display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;
+}
+.filter-chip{
+  padding:3px 9px;border-radius:100px;
+  font-size:11px;font-weight:600;cursor:pointer;
+  border:1px solid var(--border2);
+  background:transparent;color:var(--text3);
+  transition:all .15s;white-space:nowrap;
+}
+.filter-chip:hover{border-color:var(--accent);color:var(--accent)}
+.filter-chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+
+.sidebar-list{
+  flex:1;overflow-y:auto;
+  padding:8px;
+}
+.sidebar-list::-webkit-scrollbar{width:4px}
+.sidebar-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.q-item{
+  padding:10px 12px;
+  border-radius:var(--r-sm);
+  cursor:pointer;
+  margin-bottom:2px;
+  border:1px solid transparent;
+  transition:all .15s;
+}
+.q-item:hover{background:var(--bg3)}
+.q-item.active{background:var(--bg3);border-color:var(--accent)}
+.q-item-num{
+  font-family:'DM Mono',monospace;
+  font-size:10px;color:var(--text3);
+  margin-bottom:3px;
+}
+.q-item-text{
+  font-size:12px;color:var(--text2);
+  line-height:1.4;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.q-item-cat{
+  display:inline-block;margin-top:4px;
+  font-size:10px;font-weight:600;
+  padding:2px 6px;border-radius:3px;
+  background:var(--bg);color:var(--text3);
+}
+.q-item.has-img .q-item-num::after{content:' 🖼';font-size:9px}
+
+/* ── MAIN EDITOR ── */
+.editor{
+  flex:1;overflow-y:auto;
+  padding:28px 32px;
+}
+.editor::-webkit-scrollbar{width:6px}
+.editor::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+.editor-empty{
+  height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  color:var(--text3);gap:12px;
+}
+.editor-empty-icon{font-size:48px;opacity:.3}
+.editor-empty-txt{font-size:14px}
+
+.editor-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:24px;gap:16px;
+}
+.editor-id{
+  font-family:'DM Mono',monospace;font-size:11px;
+  color:var(--text3);margin-bottom:4px;
+}
+.editor-title{
+  font-size:18px;font-weight:700;color:var(--text);
+  letter-spacing:-.3px;
+}
+.btn-group{display:flex;gap:8px}
+.btn{
+  display:flex;align-items:center;gap:6px;
+  padding:8px 16px;border-radius:var(--r-sm);
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:600;
+  cursor:pointer;border:1px solid transparent;
+  transition:all .15s;
+  white-space:nowrap;
+}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+.btn-primary:hover{background:#0088d4;border-color:#0088d4}
+.btn-danger{background:transparent;color:var(--red);border-color:var(--red)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-ghost{background:transparent;color:var(--text2);border-color:var(--border2)}
+.btn-ghost:hover{border-color:var(--text2);color:var(--text)}
+.btn-add{background:var(--green);color:#000;border-color:var(--green)}
+.btn-add:hover{background:#00e676}
+
+/* Form fields */
+.field{margin-bottom:20px}
+.field-label{
+  display:block;
+  font-size:11px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1px;
+  color:var(--text3);margin-bottom:8px;
+}
+.field-input,.field-textarea,.field-select{
+  width:100%;
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  padding:10px 12px;
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  font-size:14px;
+  outline:none;
+  transition:border-color .15s;
+}
+.field-input:focus,.field-textarea:focus,.field-select:focus{
+  border-color:var(--accent);
+}
+.field-textarea{min-height:80px;resize:vertical;line-height:1.5}
+.field-select option{background:var(--bg2)}
+
+/* Options editor */
+.opts-editor{display:flex;flex-direction:column;gap:8px;margin-bottom:8px}
+.opt-row{
+  display:flex;align-items:center;gap:8px;
+}
+.opt-letter{
+  width:28px;height:28px;flex-shrink:0;
+  border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'DM Mono',monospace;font-size:11px;font-weight:700;
+  border:2px solid var(--border2);color:var(--text3);
+  background:var(--bg3);cursor:pointer;
+  transition:all .15s;
+}
+.opt-letter.correct{
+  background:var(--green);border-color:var(--green);color:#000;
+}
+.opt-letter:hover:not(.correct){border-color:var(--green);color:var(--green)}
+.opt-input{
+  flex:1;
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:8px 12px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;
+  outline:none;transition:border-color .15s;
+}
+.opt-input:focus{border-color:var(--accent)}
+.opt-row.correct-row .opt-input{
+  border-color:var(--green);background:rgba(0,200,83,.07);
+}
+.opt-drag{
+  color:var(--text3);cursor:grab;padding:4px;font-size:14px;
+}
+.opt-drag:hover{color:var(--text2)}
+.opt-remove{
+  width:24px;height:24px;border-radius:4px;
+  background:transparent;border:none;
+  color:var(--text3);cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+}
+.opt-remove:hover{background:rgba(255,59,92,.2);color:var(--red)}
+
+/* Image section */
+.img-section{
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:16px;
+  margin-bottom:20px;
+  background:var(--bg2);
+}
+.img-preview-wrap{
+  display:flex;align-items:flex-start;gap:16px;
+}
+.img-preview{
+  width:120px;height:120px;
+  border:1px solid var(--border2);border-radius:var(--r-sm);
+  object-fit:contain;background:var(--bg3);
+  flex-shrink:0;
+}
+.img-preview.empty{
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text3);font-size:28px;
+}
+.img-controls{flex:1;display:flex;flex-direction:column;gap:8px}
+.img-url-row{display:flex;gap:6px}
+.img-url-input{flex:1}
+.img-badge{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;
+  background:rgba(0,136,200,.12);color:var(--accent);border:1px solid rgba(0,136,200,.28);
+}
+
+/* Cat badge colors */
+.cat-badge{
+  display:inline-block;padding:3px 8px;border-radius:4px;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+}
+
+
+/* Sign picker */
+.sign-picker-modal{
+  position:fixed;inset:0;z-index:300;
+  background:rgba(0,0,0,.8);
+  display:none;align-items:flex-start;justify-content:center;
+  padding:40px 20px;overflow-y:auto;
+}
+.sign-picker-modal.show{display:flex}
+.sign-picker-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  width:100%;max-width:860px;
+  padding:24px;
+}
+.sign-picker-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:16px;
+}
+.sign-picker-title{font-weight:700;font-size:15px}
+.sign-picker-search{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:6px;padding:7px 12px;
+  color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;
+  outline:none;width:200px;
+}
+.sign-picker-search:focus{border-color:var(--accent)}
+.sign-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
+  gap:8px;
+  max-height:520px;overflow-y:auto;
+  padding-right:4px;
+}
+.sign-grid::-webkit-scrollbar{width:4px}
+.sign-grid::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.sign-thumb{
+  background:var(--bg3);
+  border:2px solid var(--border);
+  border-radius:8px;
+  padding:8px;
+  cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  transition:all .15s;
+}
+.sign-thumb:hover{border-color:var(--accent);background:rgba(0,136,200,.08)}
+.sign-thumb.selected{border-color:var(--green);background:rgba(0,200,83,.1)}
+.sign-thumb img{
+  width:64px;height:64px;
+  object-fit:contain;
+  background:#fff;
+  border-radius:4px;
+  padding:4px;
+}
+.sign-thumb-name{
+  font-family:'DM Mono',monospace;
+  font-size:9px;color:var(--text3);
+  text-align:center;word-break:break-all;
+  line-height:1.3;
+}
+.sign-picker-actions{
+  display:flex;justify-content:flex-end;gap:8px;
+  margin-top:16px;padding-top:16px;
+  border-top:1px solid var(--border);
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:999;
+  background:var(--green);color:#000;
+  padding:12px 20px;border-radius:var(--r);
+  font-weight:700;font-size:13px;
+  box-shadow:0 8px 32px rgba(0,0,0,.4);
+  animation:toastIn .3s ease;pointer-events:none;
+}
+.toast.error{background:var(--red);color:#fff}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:24px 0}
+
+/* Export section */
+.export-section{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:20px;
+  margin-top:32px;
+}
+.export-title{font-weight:700;margin-bottom:12px;font-size:14px}
+.export-textarea{
+  width:100%;height:200px;
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  padding:12px;color:var(--accent);
+  font-family:'DM Mono',monospace;font-size:11px;
+  resize:vertical;outline:none;
+  line-height:1.6;
+}
+
+/* Reorder handle */
+.reorder-hint{
+  font-size:11px;color:var(--text3);
+  margin-top:4px;
+}
+
+/* Add question panel */
+.add-panel{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,.7);
+  display:none;align-items:center;justify-content:center;
+  padding:24px;
+}
+.add-panel.show{display:flex}
+.add-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:28px;
+  width:100%;max-width:600px;
+  max-height:90vh;overflow-y:auto;
+}
+.add-card-title{
+  font-size:16px;font-weight:700;margin-bottom:20px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+
+/* Responsive */
+@media(max-width:768px){
+  .sidebar{width:200px}
+  .editor{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div id="toast" class="toast" style="display:none"></div>
+
+
+<!-- SIGN PICKER MODAL -->
+<div class="sign-picker-modal" id="signPickerModal">
+  <div class="sign-picker-card">
+    <div class="sign-picker-header">
+      <span class="sign-picker-title">🖼️ Seleccionar señal del repositorio</span>
+      <div style="display:flex;gap:10px;align-items:center">
+        <input class="sign-picker-search" id="signSearch" placeholder="Buscar señal..." oninput="filterSigns()">
+        <button class="btn btn-ghost" onclick="closeSignPicker()" style="padding:6px 12px">✕</button>
+      </div>
+    </div>
+    <div class="sign-grid" id="signGrid"></div>
+    <div class="sign-picker-actions">
+      <button class="btn btn-ghost" onclick="closeSignPicker()">Cancelar</button>
+      <button class="btn btn-primary" id="signPickerConfirm" onclick="confirmSignPicker()" disabled>✓ Usar esta señal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD QUESTION PANEL -->
+<div class="add-panel" id="addPanel">
+  <div class="add-card">
+    <div class="add-card-title">
+      <span>➕ Nueva pregunta</span>
+      <button class="btn btn-ghost" onclick="closeAddPanel()">✕ Cerrar</button>
+    </div>
+    <div class="field">
+      <label class="field-label">Categoría</label>
+      <select class="field-select" id="new-cat"></select>
+    </div>
+    <div class="field">
+      <label class="field-label">Imagen (opcional)</label>
+      <div style="display:flex;gap:6px">
+        <input class="field-input" id="new-img" placeholder="URL o elegir del repositorio" style="flex:1">
+        <button class="btn btn-ghost" onclick="openSignPicker(true)" style="white-space:nowrap;padding:0 12px">🖼️ Repositorio</button>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Pregunta</label>
+      <textarea class="field-textarea" id="new-q" placeholder="¿Cuál es...?"></textarea>
+    </div>
+    <div class="field">
+      <label class="field-label">Opciones (A–D) — click en la letra para marcar correcta</label>
+      <div id="new-opts" class="opts-editor">
+        <div class="opt-row" data-idx="0"><span class="opt-letter" onclick="setNewCorrect(0)">A</span><input class="opt-input" placeholder="Opción A"></div>
+        <div class="opt-row" data-idx="1"><span class="opt-letter" onclick="setNewCorrect(1)">B</span><input class="opt-input" placeholder="Opción B"></div>
+        <div class="opt-row" data-idx="2"><span class="opt-letter" onclick="setNewCorrect(2)">C</span><input class="opt-input" placeholder="Opción C"></div>
+        <div class="opt-row" data-idx="3"><span class="opt-letter" onclick="setNewCorrect(3)">D</span><input class="opt-input" placeholder="Opción D"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">Explicación</label>
+      <textarea class="field-textarea" id="new-exp" placeholder="La respuesta correcta es..."></textarea>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeAddPanel()">Cancelar</button>
+      <button class="btn btn-add" onclick="saveNewQuestion()">✓ Agregar pregunta</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <img id="bo-logo" class="topbar-logo-img" src="assets/sanfer-horizontal.png" alt="San Fernando Municipio">
+    <div>
+      <div style="font-size:13px;font-weight:700;line-height:1.2">Back Office — Test de Manejo</div>
+      <div class="topbar-sub">San Fernando Municipio</div>
+    </div>
+  </div>
+  <div class="topbar-stats">
+    <div class="stat-pill">Preguntas: <span id="stat-total">0</span></div>
+    <div class="stat-pill">Con imagen: <span id="stat-img">0</span></div>
+    <button type="button" id="theme-toggle" class="theme-toggle" onclick="toggleTheme()">🌙 Modo oscuro</button>
+    <button class="btn btn-add" onclick="showAddPanel()" style="padding:6px 14px;font-size:12px">+ Nueva</button>
+    <button class="btn btn-primary" onclick="exportBank()" style="padding:6px 14px;font-size:12px">⬇ Exportar</button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="searchInput" placeholder="Buscar pregunta..." oninput="filterList()">
+      </div>
+      <div class="filter-row" id="filterRow"></div>
+    </div>
+    <div class="sidebar-list" id="sidebarList"></div>
+  </div>
+
+  <!-- EDITOR -->
+  <div class="editor" id="editor">
+    <div class="editor-empty">
+      <div class="editor-empty-icon">📋</div>
+      <div class="editor-empty-txt">Seleccioná una pregunta para editar</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ──
+var BANK = [
+  {
+    "id": 1,
+    "cat": "Licencia de conducir",
+    "img": "",
+    "q": "Qué certifica la Licencia Nacional de Conducir?",
+    "opts": [
+      "Qué el titular pago el impuesto automotor",
+      "Qué esta habilitado para conducir determinado vehículo en la via publica",
+      "Qué el vehículo paso la VTV",
+      "Qué tiene seguro vigente"
+    ],
+    "a": 1,
+    "exp": "La licencia certifica que la persona esta habilitada para conducir un vehículo especifico en la via publica, tras cumplir los requisitos correspondientes."
+  },
+  {
+    "id": 2,
+    "cat": "Licencia de conducir",
+    "img": "",
+    "q": "Hasta cuantos dias despues de vencida se puede renovar una licencia sin tramitar una nueva?",
+    "opts": [
+      "30 dias",
+      "60 dias",
+      "90 dias",
+      "180 dias"
+    ],
+    "a": 2,
+    "exp": "En la Provincia de Buenos Aires la licencia puede renovarse hasta noventa días después de vencida. Pasado ese plazo hay que tramitar una nueva desde cero."
+  },
+  {
+    "id": 3,
+    "cat": "Licencia de conducir",
+    "img": "",
+    "q": "Qué clase de licencia habilita para automoviles y camiónetas de uso privado hasta 3.500 kg?",
+    "opts": [
+      "Clase A",
+      "Clase B",
+      "Clase C",
+      "Clase D"
+    ],
+    "a": 1,
+    "exp": "La clase B habilita para automoviles, camiónetas y utilitarios hasta 3.500 kg de uso privado."
+  },
+  {
+    "id": 4,
+    "cat": "Licencia de conducir",
+    "img": "",
+    "q": "Cuál es la edad mínima para obtener la licencia clase B?",
+    "opts": [
+      "16 años",
+      "17 años",
+      "18 años",
+      "21 años"
+    ],
+    "a": 1,
+    "exp": "La licencia clase B (automóviles y camionetas hasta 3.500 kg) requiere tener al menos 17 años cumplidos."
+  },
+  {
+    "id": 5,
+    "cat": "Licencia de conducir",
+    "img": "",
+    "q": "Cuantos examenes deben aprobar los aspirantes a la licencia en San Fernando?",
+    "opts": [
+      "1 (solo teórico)",
+      "2 (médico y teórico)",
+      "3 (médico, teórico y práctico)",
+      "4 examenes"
+    ],
+    "a": 2,
+    "exp": "Se requieren 3 examenes: psicofisico/médico, teórico y práctico de manejo."
+  },
+  {
+    "id": 6,
+    "cat": "Licencia de conducir",
+    "img": "",
+    "q": "Qué edad mínima se requiere para las licencias profesionales Clase D (transporte de pasajeros)?",
+    "opts": [
+      "17 años",
+      "18 años",
+      "19 años",
+      "21 años"
+    ],
+    "a": 3,
+    "exp": "La licencia clase D (transporte de pasajeros) requiere al menos 21 años cumplidos (Art. 16 Ley 24.449 y Disposición 20/19 Pcia. Buenos Aires). Previamente se debe poseer la clase B con al menos 1 año de antigüedad."
+  },
+  {
+    "id": 7,
+    "cat": "Licencia de conducir",
+    "img": "",
+    "q": "La clase D4 habilita para:",
+    "opts": [
+      "Camiónes con acoplado",
+      "Vehículos de urgencia y emergencia",
+      "Transporte de mas de 20 pasajeros",
+      "Maquinaria agricola"
+    ],
+    "a": 1,
+    "exp": "La clase D4 habilita para vehículos de urgencia y emergencia, siempre acompañada de la subclase correspondiente al tipo de vehículo."
+  },
+  {
+    "id": 8,
+    "cat": "Licencia de conducir",
+    "img": "",
+    "q": "Qué edad mínima establece la Ley 24.449 para conducir ciclomotores (hasta 50cc)?",
+    "opts": [
+      "14 años",
+      "15 años",
+      "16 años",
+      "18 años"
+    ],
+    "a": 2,
+    "exp": "La Ley 24.449 y su decreto reglamentario establecen que la edad mínima para conducir ciclomotores de hasta 50cc es de 16 años. Entre los 16 y 17 años, con restricciones de circulación en autopistas."
+  },
+  {
+    "id": 9,
+    "cat": "Licencia de conducir",
+    "img": "",
+    "q": "Qué sucede si la licencia esta vencida al momento de un control?",
+    "opts": [
+      "Se puede seguir manejando 30 dias mas",
+      "El agente puede realizar una retencion preventiva",
+      "Solo se labra un acta sin consecuencias",
+      "Se otorga un plazo de 15 dias para renovar"
+    ],
+    "a": 1,
+    "exp": "Conducir con la licencia vencida es una falta grave que puede implicar la retencion preventiva del documento por el agente de transito."
+  },
+  {
+    "id": 10,
+    "cat": "Documentacion",
+    "img": "",
+    "q": "Cuál es la documentacion OBLIGATORIA para circular con un vehículo?",
+    "opts": [
+      "Solo licencia y DNI",
+      "Licencia, DNI, cedula verde, seguro, patentes y VTV",
+      "Solo licencia habilitante y seguro",
+      "Licencia, patente e impuesto automotor"
+    ],
+    "a": 1,
+    "exp": "Es obligatorio portar: licencia habilitante, DNI, cedula verde, seguro de responsabilidad civil vigente, chapas de dominio originales, VTV e impuesto automotor."
+  },
+  {
+    "id": 11,
+    "cat": "Documentacion",
+    "img": "",
+    "q": "Qué acredita la VTV?",
+    "opts": [
+      "Qué el vehículo pago el patente",
+      "Qué el conductor aprobo el examen práctico",
+      "Qué los elementos de seguridad del vehículo estan en optimas condiciones",
+      "Qué el seguro esta vigente"
+    ],
+    "a": 2,
+    "exp": "La VTV (Verificacion Tecnica Vehicular) certifica que todos los elementos de seguridad del vehículo funcionan correctamente."
+  },
+  {
+    "id": 12,
+    "cat": "Documentacion",
+    "img": "",
+    "q": "Es valido el comprobante de pago del seguro como constancia de vigencia?",
+    "opts": [
+      "Si, siempre es valido",
+      "Solo si fue pagado el mes anterior",
+      "No, el comprobante de pago no es constancia de vigencia del seguro",
+      "Solo en zonas urbanas"
+    ],
+    "a": 2,
+    "exp": "El comprobante de pago no garantiza la vigencia del seguro. Se debe portar el comprobante de cobertura vigente emitido por la aseguradora."
+  },
+  {
+    "id": 13,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Cuál es el orden correcto de prioridad normativa al circular?",
+    "opts": [
+      "Normas legales, semáforos, autoridad",
+      "Autoridad, señales transitorias, semáforos, señalización vertical, normas legales",
+      "Semáforos, autoridad, normas, señales",
+      "Señales verticales, autoridad, semáforos"
+    ],
+    "a": 1,
+    "exp": "El orden es: 1 Autoridad de control, 2 Señales transitorias, 3 Semáforos, 4 Señalización vertical y demarcación, 5 Normas legales."
+  },
+  {
+    "id": 14,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Qué indica la línea continua en la calzada?",
+    "opts": [
+      "Puede traspasarse con precaución",
+      "Solo de noche puede cruzarse",
+      "No debe traspasarse ni circular sobre ella",
+      "Zona de estacionamiento permitido"
+    ],
+    "a": 2,
+    "exp": "La línea continua, sea blanca o amarilla, prohibe traspasarla o circular sobre ella."
+  },
+  {
+    "id": 15,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Qué indica la línea discontinua?",
+    "opts": [
+      "Nunca puede traspasarse",
+      "Indica posibilidad de traspasarse",
+      "Solo puede cruzarse de noche",
+      "Solo en zonas urbanas"
+    ],
+    "a": 1,
+    "exp": "La línea discontinua indica que puede traspasarse cuando las condiciones lo permiten, a diferencia de la línea continua."
+  },
+  {
+    "id": 16,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Cuál es la velocidad máxima en calles urbanas?",
+    "opts": [
+      "30 km/h",
+      "40 km/h",
+      "60 km/h",
+      "80 km/h"
+    ],
+    "a": 1,
+    "exp": "Art. 51 Ley 24.449: en zonas urbanas la velocidad máxima es 40 km/h en calles y 60 km/h en avenidas, salvo señalización en contrario. La presencia de semáforos no modifica estos límites salvo señal expresa. Senalización diferente."
+  },
+  {
+    "id": 17,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Qué indica el color naranja en las señales transitorias?",
+    "opts": [
+      "Peligro extremo permanente",
+      "Obras o trabajos en la via y sus proximidades",
+      "Zona escolar",
+      "Prohibicion definitiva"
+    ],
+    "a": 1,
+    "exp": "El naranja identifica las señales transitorias por obras. Tienen prioridad sobre la señalización habitual de la via."
+  },
+  {
+    "id": 18,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Quienes tienen prioridad de paso en la via publica?",
+    "opts": [
+      "Los vehículos mas grandes",
+      "Peatónes y ciclistas sobre los vehículos motorizados",
+      "Los vehículos que vienen por la izquierda",
+      "El vehículo con mas pasajeros"
+    ],
+    "a": 1,
+    "exp": "Los usuarios vulnerables (peatónes, ciclistas) tienen prioridad. En intersecciónes sin semáforo, tiene prioridad quien viene por la derecha."
+  },
+  {
+    "id": 19,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Puede el agente de transito ordenar el avance con semáforo en rojo?",
+    "opts": [
+      "Nunca, el semáforo siempre tiene prioridad",
+      "Si, sus ordenes prevalecen sobre semáforos y señales",
+      "Solo en horario nocturno",
+      "Solo en autopistas"
+    ],
+    "a": 1,
+    "exp": "Los agentes de transito tienen prioridad sobre cualquier señal o semáforo. Sus indicaciónes siempre deben obedecerse."
+  },
+  {
+    "id": 20,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Qué distancia lateral mínima debe guardar un vehículo al adelantar a un ciclista?",
+    "opts": [
+      "50 cm",
+      "1 metro",
+      "1,5 metros",
+      "2 metros"
+    ],
+    "a": 2,
+    "exp": "La normativa establece una distancia mínima de 1,5 metros de separación lateral al adelantar a ciclistas para garantizar su seguridad."
+  },
+  {
+    "id": 21,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Qué tipo de señales tienen prioridad sobre la señalización habitual de la via?",
+    "opts": [
+      "Las señales informativas verdes",
+      "Las señales transitorias naranjas por obras",
+      "Las señales de velocidad máxima",
+      "Las señales de prohibicion permanentes"
+    ],
+    "a": 1,
+    "exp": "Las señales transitorias naranjas (obras, trabajos) tienen prioridad sobre cualquier otra señalización habitual instalada en la via."
+  },
+  {
+    "id": 22,
+    "cat": "Normas de conducción",
+    "img": "",
+    "q": "Como debe circular un vehículo por una rotonda?",
+    "opts": [
+      "En sentido horario por el carril exterior",
+      "En sentido antihorario, cediendo el paso a quien ya circula dentro",
+      "En el sentido que indique el semáforo",
+      "De frente, sin reducir velocidad"
+    ],
+    "a": 1,
+    "exp": "En Argentina las rotondas se circulan en sentido antihorario. El vehículo que intenta ingresar debe ceder el paso a los que ya circulan dentro de la rotonda."
+  },
+  {
+    "id": 23,
+    "cat": "Alcohol y drogas",
+    "img": "",
+    "q": "Cuál es la tasa legal de alcohol en sangre para conducir en Buenos Aires?",
+    "opts": [
+      "0,5 g/l",
+      "0,2 g/l",
+      "0,0 g/l (Alcohol Cero)",
+      "1,0 g/l"
+    ],
+    "a": 2,
+    "exp": "La Ley 27.714 (modificatoria del Art. 48 Ley 24.449, vigente desde mayo 2023) establece Alcohol Cero a nivel nacional: no se puede conducir con ninguna concentracion de alcohol en sangre en la provincia de Buenos Aires."
+  },
+  {
+    "id": 24,
+    "cat": "Alcohol y drogas",
+    "img": "",
+    "q": "Qué inhabilitacion recibe quien conduce con hasta 499 mg de alcohol por litro de sangre?",
+    "opts": [
+      "Solo multa economica",
+      "3 meses de inhabilitacion",
+      "6 meses de inhabilitacion",
+      "18 meses de inhabilitacion"
+    ],
+    "a": 1,
+    "exp": "Según la Ley 13.927 de la Provincia de Buenos Aires, conducir con hasta 499 mg de alcohol por litro implica 3 meses de inhabilitación. La Ley nacional 27.714 (2023) establece Alcohol Cero, por lo que cualquier detección positiva constituye infracción. Conducir con hasta 499 mg de alcohol por litro de sangre implica 3 meses de inhabilitacion para manejar segun la Ley de Alcohol Cero."
+  },
+  {
+    "id": 25,
+    "cat": "Alcohol y drogas",
+    "img": "",
+    "q": "Qué sucede si un conductor se niega al control de alcoholemia?",
+    "opts": [
+      "Se lo deja ir sin consecuencias",
+      "Se presume positivo y se aplica el procedimiento correspondiente",
+      "Solo recibe multa menor",
+      "Se lo cita a declarar despues"
+    ],
+    "a": 1,
+    "exp": "Negarse al control genera una presuncion en contra del conductor. La autoridad aplica el mismo procedimiento que si hubiera dado positivo."
+  },
+  {
+    "id": 26,
+    "cat": "Alcohol y drogas",
+    "img": "",
+    "q": "Ademas de disminuir reflejos, el alcohol puede:",
+    "opts": [
+      "Mejorar momentaneamente la concentracion",
+      "Generar falsa sensacion de seguridad y conductas temerarias",
+      "Reducir la velocidad instintivamente",
+      "Aumentar la vision periferica"
+    ],
+    "a": 1,
+    "exp": "El alcohol provoca falsa sensacion de seguridad y perdida de inhibiciones, lo que lleva a conductas riesgosas como exceso de velocidad o no usar cinturon."
+  },
+  {
+    "id": 27,
+    "cat": "Alcohol y drogas",
+    "img": "",
+    "q": "Cuales son los factores que disminuyen la capacidad de conducción?",
+    "opts": [
+      "Solo el alcohol y las drogas",
+      "Alcohol/drogas, sueño y fatiga, estres y distracciones",
+      "El clima, el tráfico y el cansancio",
+      "Solo distracciones por el celular"
+    ],
+    "a": 1,
+    "exp": "Los cuatro factores que reducen la capacidad de conducir son: alcohol y drogas, sueño y fatiga, estres, y distracciones."
+  },
+  {
+    "id": 28,
+    "cat": "Alcohol y drogas",
+    "img": "",
+    "q": "Segun la ANSV, el alcohol esta presente en que porcion de los siniestros viales con fallecidos?",
+    "opts": [
+      "1 de cada 10",
+      "1 de cada 4",
+      "1 de cada 2",
+      "9 de cada 10"
+    ],
+    "a": 1,
+    "exp": "Segun la ANSV (2023), el alcohol esta presente en al menos 1 de cada 4 siniestros viales con fallecidos en Argentina."
+  },
+  {
+    "id": 29,
+    "cat": "Alcohol y drogas",
+    "img": "",
+    "q": "Cuanto tiempo puede llevar al organismo metabolizar el alcohol ingerido?",
+    "opts": [
+      "Minutos",
+      "Exactamente 1 hora por cada copa",
+      "Varias horas, variando segun masa corporal, alimentacion y funcion hepatica",
+      "Siempre menos de 2 horas"
+    ],
+    "a": 2,
+    "exp": "El tiempo de metabolizacion del alcohol varia segun cada persona: masa corporal, ingesta de alimentos y funcion hepatica son factores determinantes. Puede llevar varias horas."
+  },
+  {
+    "id": 30,
+    "cat": "Elementos de seguridad",
+    "img": "",
+    "q": "Cuales son las tres funciones principales del casco para motociclistas?",
+    "opts": [
+      "Proteger el cuello, reducir ruido y mejorar vision",
+      "Reducir desaceleracion del craneo, dispersar el impacto y actuar como barrera mecanica",
+      "Proteger cara, cuello y nuca unicamente",
+      "Mejorar aerodinamica, proteger cara y reducir fatiga"
+    ],
+    "a": 1,
+    "exp": "El casco: 1) Reduce la desaceleracion del craneo absorbiendo el impacto, 2) Dispersa la fuerza sobre una superficie mayor, 3) Actua como barrera mecanica entre craneo y objeto."
+  },
+  {
+    "id": 31,
+    "cat": "Elementos de seguridad",
+    "img": "",
+    "q": "Qué son los puntos ciegos en un vehículo?",
+    "opts": [
+      "Zonas sin buena iluminacion nocturna",
+      "Zonas que el conductor no puede ver mirando al frente ni usando los espejos",
+      "Angulos muertos del semáforo",
+      "Areas sin señal de radio"
+    ],
+    "a": 1,
+    "exp": "Los puntos ciegos son las zonas de la via que el conductor no puede ver al mirar al frente ni al usar los espejos retrovisores o laterales."
+  },
+  {
+    "id": 32,
+    "cat": "Elementos de seguridad",
+    "img": "",
+    "q": "Como deben viajar los menores de 4 años segun las normas bonaerenses?",
+    "opts": [
+      "En el asiento delantero con cinturon",
+      "Con el Sistema de Retencion Infantil (SRI) en el asiento trasero",
+      "En brazos de un adulto",
+      "Con cinturon normal en el asiento trasero"
+    ],
+    "a": 1,
+    "exp": "Los menores de 10 años deben ir en el asiento trasero; los menores de 4 años, ademas, con el SRI adecuado a su talla y peso."
+  },
+  {
+    "id": 33,
+    "cat": "Elementos de seguridad",
+    "img": "",
+    "q": "Cuál es el lugar mas seguro para colocar el SRI?",
+    "opts": [
+      "Asiento delantero derecho",
+      "Plaza trasera derecha",
+      "Plaza trasera central",
+      "Plaza trasera izquierda"
+    ],
+    "a": 2,
+    "exp": "El lugar mas seguro para un SRI es la plaza trasera central, seguida por la trasera derecha y luego la izquierda."
+  },
+  {
+    "id": 34,
+    "cat": "Elementos de seguridad",
+    "img": "",
+    "q": "Hasta que edad y peso mínimo debe viajar un bebe mirando hacia atras en el SRI?",
+    "opts": [
+      "1 año o 8 kg",
+      "2 años y 10 kg como mínimo",
+      "3 años o 15 kg",
+      "6 meses o 5 kg"
+    ],
+    "a": 1,
+    "exp": "El bebe debe viajar mirando hacia atras hasta los 2 años y 10 kg como mínimo. Esa orientación protege mejor la cabeza, el cuello y la columna."
+  },
+  {
+    "id": 35,
+    "cat": "Elementos de seguridad",
+    "img": "",
+    "q": "A que grupo SRI pertenece el huevito?",
+    "opts": [
+      "Grupo 1 (9-18 kg)",
+      "Grupos 0 y 0+ (hasta 10-13 kg)",
+      "Grupo 2 (15-27 kg)",
+      "Grupo 3 (22-36 kg)"
+    ],
+    "a": 1,
+    "exp": "El huevito corresponde al Grupo 0 (hasta 10 kg) y 0+ (hasta 13 kg), y siempre se instala mirando hacia atras."
+  },
+  {
+    "id": 36,
+    "cat": "Elementos de seguridad",
+    "img": "",
+    "q": "Pueden instalarse SRI en asientos con airbag activo adelante?",
+    "opts": [
+      "Si, siempre que sea un modelo homologado",
+      "Si, solo en modo contramarcha",
+      "No, jamas deben instalarse en asientos con airbag activo",
+      "Solo si el bebe pesa mas de 13 kg"
+    ],
+    "a": 2,
+    "exp": "Los SRI jamas deben instalarse en asientos que dispongan de airbag activos, ya que la activacion del airbag puede causar lesiones graves al bebe."
+  },
+  {
+    "id": 37,
+    "cat": "Motovehículos",
+    "img": "",
+    "q": "Qué clase de licencia se necesita para motos de mas de 300cc?",
+    "opts": [
+      "A 1.2",
+      "A 1.3",
+      "A 1.4",
+      "B 1"
+    ],
+    "a": 2,
+    "exp": "La clase A1.4 habilita para motos de mas de 300 cc o mas de 20 kw. Requiere 2 años de antiguedad en A1.3 o 1 año si se tiene mas de 21."
+  },
+  {
+    "id": 38,
+    "cat": "Motovehículos",
+    "img": "",
+    "q": "Como debe frenar de forma segura un motociclista?",
+    "opts": [
+      "Solo con el freno trasero",
+      "Desacelerando con el motor y acciónando ambos frenos progresivamente",
+      "Solo con el freno delantero",
+      "Frenando bruscamente con el freno delantero primero"
+    ],
+    "a": 1,
+    "exp": "La tecnica correcta es desacelerar con el motor (sin soltar el embrague de golpe) y luego acciónar ambos frenos progresivamente. Usar un solo freno brusco puede provocar caida."
+  },
+  {
+    "id": 39,
+    "cat": "Motovehículos",
+    "img": "",
+    "q": "Cuál es la postura correcta de las manos en el manillar?",
+    "opts": [
+      "180 grados con codos rectos",
+      "Angulo de 120 grados en las muñecas, 2-3 dedos en las manetas",
+      "Solo apoyadas ligeramente",
+      "En la parte interior del manillar"
+    ],
+    "a": 1,
+    "exp": "Las manos deben formar un ángulo de 120 grados con las muñecas, usando mínimo 2 y máximo 3 dedos para acciónar freno y embrague."
+  },
+  {
+    "id": 40,
+    "cat": "Motovehículos",
+    "img": "",
+    "q": "Qué es el efecto Venturi para motociclistas?",
+    "opts": [
+      "La tendencia de la moto a irse hacia adelante al frenar",
+      "La succion que genera un vehículo de gran porte al circular muy cerca, causando perdida de estabilidad",
+      "La perdida de tracción trasera en curvas",
+      "El efecto del viento en la visibilidad del visor"
+    ],
+    "a": 1,
+    "exp": "El efecto Venturi ocurre cuando un motociclista circula cerca de un camión o micro: la diferencia de presion genera una succion que puede provocar caida o perdida de control."
+  },
+  {
+    "id": 41,
+    "cat": "Motovehículos",
+    "img": "",
+    "q": "Los ciclomotores (hasta 50cc) pueden circular por autopistas?",
+    "opts": [
+      "Si, por el carril derecho",
+      "Si, si llevan casco y chaleco",
+      "No, los ciclomotores no pueden circular por autopistas",
+      "Solo de noche cuando hay menos tráfico"
+    ],
+    "a": 2,
+    "exp": "Los ciclomotores (hasta 50 cc, subclase A1.1) tienen expresamente prohibida la circulación por autopistas."
+  },
+  {
+    "id": 42,
+    "cat": "Transporte profesional",
+    "img": "",
+    "q": "Qué es el fenomeno off-tracking en vehículos de gran porte?",
+    "opts": [
+      "La desviacion del volante en pendiente",
+      "Las ruedas traseras siguen una trayectoria mas cerrada que las delanteras al girar",
+      "La perdida de frenos en caminos mojados",
+      "El deslizamiento del acoplado en curvas"
+    ],
+    "a": 1,
+    "exp": "En el off-tracking, al girar un vehículo grande, las ruedas traseras siguen una trayectoria mas estrecha que las delanteras, desplazando el extremo trasero hacia el lado opuesto de la curva."
+  },
+  {
+    "id": 43,
+    "cat": "Transporte profesional",
+    "img": "",
+    "q": "Como debe realizar las paradas un conductor de colectivo urbano?",
+    "opts": [
+      "Donde sea mas conveniente para el pasajero",
+      "En paradas habilitadas, paralelo a la vereda y junto a ella",
+      "En doble fila si la parada esta ocupada",
+      "En la bocacalle para mayor visibilidad"
+    ],
+    "a": 1,
+    "exp": "Las paradas deben realizarse en paradas habilitadas, en forma paralela a la vereda para evitar que motos o bicicletas sobrepasen por la derecha al subir y bajar pasajeros."
+  },
+  {
+    "id": 44,
+    "cat": "Transporte profesional",
+    "img": "",
+    "q": "Cuando puede un colectivo detenerse fuera de las paradas habilitadas?",
+    "opts": [
+      "Siempre que el pasajero lo solicite",
+      "Con discapacitados, dias de lluvia u horario nocturno (22hs a 6hs)",
+      "Nunca bajo ninguna circunstancia",
+      "Cuando la parada siguiente esta a mas de 200 metros"
+    ],
+    "a": 1,
+    "exp": "Solo puede detenerse fuera de paradas para pasajeros con discapacidad, en dias de lluvia, o en horario nocturno entre las 22 y las 6 horas."
+  },
+  {
+    "id": 45,
+    "cat": "Transporte profesional",
+    "img": "",
+    "q": "Como se reduce el riesgo de los puntos ciegos en vehículos de gran porte?",
+    "opts": [
+      "Aumentar la velocidad para mayor control",
+      "Ajustar espejos antes de iniciar y mirar al menos dos veces antes de maniobrar",
+      "Usar solo el espejo retrovisor interno",
+      "Evitar circular en zonas urbanas"
+    ],
+    "a": 1,
+    "exp": "Se debe ajustar correctamente los espejos antes de partir, y antes de toda maniobra: reducir velocidad, activar la luz de giro y verificar por los espejos al menos dos veces."
+  },
+  {
+    "id": 46,
+    "cat": "Transporte profesional",
+    "img": "",
+    "q": "Se considera conductor profesional a quien conduce con licencia de categoria:",
+    "opts": [
+      "B solamente",
+      "A y B",
+      "C, D y E",
+      "Cualquier categoria, si lo hace como trabajo"
+    ],
+    "a": 2,
+    "exp": "Se considera conductor profesional a quienes poseen licencias C, D o E y hacen de la conducción su actividad laboral: taxis, colectivos, camiónes, etc."
+  },
+  {
+    "id": 47,
+    "cat": "Responsabilidad vial",
+    "img": "",
+    "q": "Cuál es el principal factor de riesgo en los incidentes de transito?",
+    "opts": [
+      "Factor ambiental",
+      "Factor vehicular",
+      "Factor humano",
+      "Factor climatico"
+    ],
+    "a": 2,
+    "exp": "El factor humano (decisiones, omisiones, actitudes y conductas) es el principal factor de riesgo en los incidentes viales."
+  },
+  {
+    "id": 48,
+    "cat": "Responsabilidad vial",
+    "img": "",
+    "q": "Qué diferencia un incidente de un accidente de transito?",
+    "opts": [
+      "La gravedad de las lesiones",
+      "El incidente es evitable e interviene el factor humano; el accidente es fortuito",
+      "El tipo de vehículo involucrado",
+      "La hora del dia en que ocurre"
+    ],
+    "a": 1,
+    "exp": "Un accidente es fortuito e impredecible. Un incidente de transito es evitable y siempre interviene el factor humano en su produccion."
+  },
+  {
+    "id": 49,
+    "cat": "Responsabilidad vial",
+    "img": "",
+    "q": "Cuantos fallecidos registro Argentina en siniestros viales en 2023?",
+    "opts": [
+      "1.190 fallecidos",
+      "4.369 fallecidos en 3.642 incidentes",
+      "8.000 fallecidos",
+      "2.100 fallecidos"
+    ],
+    "a": 1,
+    "exp": "Segun la ANSV, en 2023 se registraron 3.642 incidentes viales con 4.369 fallecidos en Argentina."
+  },
+  {
+    "id": 50,
+    "cat": "Responsabilidad vial",
+    "img": "",
+    "q": "Cuantas vidas cobra el transito anualmente en el mundo segun la OMS?",
+    "opts": [
+      "500.000",
+      "1,19 millones",
+      "3 millones",
+      "800.000"
+    ],
+    "a": 1,
+    "exp": "La OMS estima que los incidentes de transito causan apróximadamente 1,19 millones de muertes al año en todo el mundo."
+  },
+  {
+    "id": 51,
+    "cat": "Responsabilidad vial",
+    "img": "",
+    "q": "Cuales son los tres factores que intervienen en un incidente de transito?",
+    "opts": [
+      "Velocidad, visibilidad y estado del vehículo",
+      "Factor humano, vehicular y ambiental",
+      "Infraestructura, clima y habilidad del conductor",
+      "Tiempo de reacción, distancia y velocidad"
+    ],
+    "a": 1,
+    "exp": "Los tres factores son: Humano (decisiones y conductas), Vehicular (estado mecanico) y Ambiental (infraestructura, clima, entorno)."
+  },
+  {
+    "id": 52,
+    "cat": "Responsabilidad vial",
+    "img": "",
+    "q": "A quien le corresponde respetar las normas de transito?",
+    "opts": [
+      "Solo a los conductores de vehículos motorizados",
+      "Solo a los conductores profesionales",
+      "A todos los usuarios de la via: conductores, peatónes y ciclistas",
+      "Solo a quien ha cometido infracciónes previas"
+    ],
+    "a": 2,
+    "exp": "Las normas de transito aplican a todos los usuarios de la via publica: conductores, ciclistas, peatónes y cualquier persona que interactue en el espacio vial."
+  },
+  {
+    "id": 53,
+    "cat": "Responsabilidad vial",
+    "img": "",
+    "q": "Los siniestros viales son la principal causa de muerte en que franja etaria?",
+    "opts": [
+      "Niños menores de 5 años",
+      "Jovenes y adultos de 5 a 29 años",
+      "Adultos mayores de 65 años",
+      "Adultos de 40 a 60 años"
+    ],
+    "a": 1,
+    "exp": "Segun la OMS, los incidentes de transito son la principal causa de muerte entre personas de 5 a 29 años a nivel mundial."
+  },
+  {
+    "id": 54,
+    "cat": "Semáforos",
+    "img": "",
+    "q": "Qué indica el semáforo en luz amarilla?",
+    "opts": [
+      "Avanzar con precaución",
+      "Detenerse si se estima que no se podra cruzar antes de que cambie a roja",
+      "Acelerar para cruzar antes de que se ponga roja",
+      "Continuar siempre, la amarilla es solo aviso"
+    ],
+    "a": 1,
+    "exp": "La luz amarilla indica detenerse si el conductor estima que no podra terminar de cruzar antes de que cambie a roja. No es una autorizacion para acelerar."
+  },
+  {
+    "id": 55,
+    "cat": "Semáforos",
+    "img": "",
+    "q": "Qué indica el semáforo intermitente amarillo?",
+    "opts": [
+      "Detenerse completamente como si fuera roja",
+      "Avanzar sin precaution porque la via esta despejada",
+      "Presencia de cruce riesgoso: reducir velocidad y cruzar con precaución",
+      "Qué el semáforo esta averiado"
+    ],
+    "a": 2,
+    "exp": "El semáforo intermitente amarillo advierte sobre un cruce riesgoso. Se debe aminorar la marcha y efectuar el cruce con máxima precaución."
+  },
+  {
+    "id": 56,
+    "cat": "Semáforos",
+    "img": "",
+    "q": "Qué indica el semáforo intermitente rojo?",
+    "opts": [
+      "Avanzar como si fuera verde",
+      "Cruce peligroso: detenerse y reanudar solo cuando no exista riesgo",
+      "Dar prioridad a peatónes y continuar",
+      "Ignorarlo si no hay otros vehículos"
+    ],
+    "a": 1,
+    "exp": "El semáforo intermitente rojo indica la presencia de un cruce peligroso. Se debe detener la marcha y solo reanudarla cuando se observe que no existe riesgo alguno."
+  },
+  {
+    "id": 57,
+    "cat": "Semáforos",
+    "img": "",
+    "q": "Ante una luz roja del semáforo, donde debe detenerse el vehículo?",
+    "opts": [
+      "En la mitad de la bocacalle",
+      "Antes de la línea marcada a tal efecto o de la senda peatónal",
+      "A 5 metros de la esquina",
+      "Donde lo indique el inspector de transito"
+    ],
+    "a": 1,
+    "exp": "Ante la luz roja, el vehículo debe detenerse antes de la línea de detenccion marcada en la calzada o, en su defecto, antes de la senda peatónal."
+  },
+  {
+    "id": 58,
+    "cat": "Distancias de seguridad",
+    "img": "",
+    "q": "Cuál es la distancia mínima lateral que debe guardar un vehículo al adelantar a un ciclista?",
+    "opts": [
+      "50 centimetros",
+      "1 metro",
+      "1,5 metros",
+      "2 metros"
+    ],
+    "a": 2,
+    "exp": "La normativa establece una distancia mínima de 1,5 metros de separación lateral al sobrepasar a ciclistas, para garantizar su seguridad ante posibles maniobras evasivas."
+  },
+  {
+    "id": 59,
+    "cat": "Distancias de seguridad",
+    "img": "",
+    "q": "La distancia de seguridad entre vehículos en movimiento depende principalmente de:",
+    "opts": [
+      "El color del vehículo de adelante",
+      "La velocidad de circulación y el tiempo de reacción del conductor",
+      "El tipo de combustible del vehículo",
+      "La cantidad de pasajeros que transporta"
+    ],
+    "a": 1,
+    "exp": "La distancia de seguridad debe permitir frenar sin colisionar si el vehículo de adelante detiene bruscamente. A mayor velocidad, mayor distancia necesaria. Se aplica la regla de los 2 segundos como mínimo."
+  },
+  {
+    "id": 60,
+    "cat": "Distancias de seguridad",
+    "img": "",
+    "q": "Cuál es la regla práctica para calcular la distancia de seguridad mínima en condiciones normales?",
+    "opts": [
+      "Mantener 10 metros por cada 10 km/h de velocidad",
+      "Contar 2 segundos desde que el vehículo de adelante pasa un punto fijo hasta que lo pasa el propio vehículo",
+      "Mantener siempre 50 metros fijos independientemente de la velocidad",
+      "La mitad de los metros que indica el velocimetro en km/h"
+    ],
+    "a": 1,
+    "exp": "La regla de los 2 segundos consiste en elegir un punto fijo y contar 2 segundos desde que el vehículo adelante lo pasa. En condiciones adversas (lluvia, niebla, noche) se debe duplicar a 4 segundos."
+  },
+  {
+    "id": 61,
+    "cat": "Distancias de seguridad",
+    "img": "",
+    "q": "En caso de lluvia o piso mojado, la distancia de seguridad respecto del vehículo de adelante debe:",
+    "opts": [
+      "Mantenerse igual que en seco",
+      "Reducirse porque los frenos modernos compensan",
+      "Duplicarse o triplicarse respecto de la distancia en seco",
+      "Depende solo del tipo de neumaticos"
+    ],
+    "a": 2,
+    "exp": "Con piso mojado la distancia de frenado aumenta considerablemente. Se recomienda duplicar o triplicar la distancia de seguridad habitual para compensar la reducción de adherencia."
+  },
+  {
+    "id": 62,
+    "cat": "Distancias de seguridad",
+    "img": "",
+    "q": "Qué distancia mínima debe respetarse al estacionar cerca de una boca de incendio?",
+    "opts": [
+      "3 metros",
+      "5 metros",
+      "6 metros",
+      "10 metros"
+    ],
+    "a": 0,
+    "exp": "Esta prohibido estacionar a menos de 3 metros de una boca de incendio para garantizar el acceso rápido de los bomberos en caso de emergencia."
+  },
+  {
+    "id": 63,
+    "cat": "Estacionamiento",
+    "img": "",
+    "q": "A cuantos metros de una esquina o bocacalle esta prohibido estacionar?",
+    "opts": [
+      "3 metros",
+      "5 metros",
+      "10 metros",
+      "La distancia que indique la señal"
+    ],
+    "a": 1,
+    "exp": "Esta prohibido estacionar a menos de 5 metros de la bocacalle (línea imaginaria de prolongacion de la ochava), para garantizar la visibilidad y el acceso a la intersección."
+  },
+  {
+    "id": 64,
+    "cat": "Estacionamiento",
+    "img": "",
+    "q": "Qué indica la señal R9 (cuadrado con una X dentro sobre fondo rojo)?",
+    "opts": [
+      "Prohibicion de estacionar unicamente",
+      "Prohibicion de estacionar Y también de detenerse momentaneamente",
+      "Estacionamiento permitido solo para residentes",
+      "Zona de carga y descarga exclusiva"
+    ],
+    "a": 1,
+    "exp": "La señal R9 prohibe absolutamente tanto estacionar como detenerse, ni siquiera momentaneamente. Es la restricción mas severa de circulación en ese sector."
+  },
+  {
+    "id": 65,
+    "cat": "Estacionamiento",
+    "img": "",
+    "q": "En que lado de la calzada debe estacionarse el vehículo segun la normativa general?",
+    "opts": [
+      "A la derecha en el sentido de la marcha, paralelo a la vereda",
+      "A la izquierda para facilitar el descenso",
+      "En el centro si hay espacio disponible",
+      "Del lado que indique el conductor de acuerdo a su conveniencia"
+    ],
+    "a": 0,
+    "exp": "Los vehículos deben estacionarse a la derecha en el sentido de la marcha, en forma paralela a la vereda y junto a ella, salvo en lugares con señalización especifica que indique otra disposicion."
+  },
+  {
+    "id": 66,
+    "cat": "Estacionamiento",
+    "img": "",
+    "q": "Cuando esta permitido estacionar en doble fila?",
+    "opts": [
+      "Cuando solo se tardara menos de 5 minutos",
+      "Cuando hay poca circulación de vehículos",
+      "Nunca esta permitido, es una infracción grave",
+      "Solo en zonas comerciales durante el dia"
+    ],
+    "a": 2,
+    "exp": "El estacionamiento en doble fila esta terminantemente prohibido. Obstaculiza la circulación, bloquea vehículos estacionados correctamente y puede generar situaciónes de peligro."
+  },
+  {
+    "id": 67,
+    "cat": "Estacionamiento",
+    "img": "",
+    "q": "Qué deben respetar los conductores al estacionar sobre una pendiente pronunciada?",
+    "opts": [
+      "Dejar el motor en marcha para mayor seguridad",
+      "Girar las ruedas hacia la vereda o el cordon y usar el freno de mano",
+      "Estacionar en punto muerto sin freno de mano",
+      "No hay obligación especial en pendientes"
+    ],
+    "a": 1,
+    "exp": "En pendientes se debe girar las ruedas hacia la vereda (en bajada) o hacia la calzada (en subida) como medida de seguridad ante una posible falla del freno de mano, y siempre acciónar el freno de estacionamiento."
+  },
+  {
+    "id": 68,
+    "cat": "Velocidades especificas",
+    "img": "",
+    "q": "Cuál es la velocidad máxima permitida en zonas escolares o cuando hay niños cruzando?",
+    "opts": [
+      "20 km/h",
+      "30 km/h",
+      "40 km/h",
+      "50 km/h"
+    ],
+    "a": 0,
+    "exp": "Art. 51 inc. 3 Ley 24.449: en proximidad de establecimientos escolares y cuando hay niños presentes, la velocidad precautoria máxima es de 20 km/h durante su funcionamientod máxima es de 20 km/h, o la que indique la señalización, lo que sea menor."
+  },
+  {
+    "id": 69,
+    "cat": "Velocidades especificas",
+    "img": "",
+    "q": "Cuál es la velocidad máxima en rutas nacionales de doble mano sin banquina pavimentada?",
+    "opts": [
+      "80 km/h",
+      "100 km/h",
+      "110 km/h",
+      "120 km/h"
+    ],
+    "a": 1,
+    "exp": "Art. 51 Ley 24.449: en rutas de doble mano la velocidad máxima general es 110 km/h para automóviles. Sin embargo, sin banquina pavimentada el límite es 100 km/h. La respuesta correcta aplica a la situación más restrictiva y frecuente. Pero puede reducirse segun las condiciones de la via y la señalización presente."
+  },
+  {
+    "id": 70,
+    "cat": "Velocidades especificas",
+    "img": "",
+    "q": "En autopistas y autovias, cual es la velocidad máxima permitida para automoviles?",
+    "opts": [
+      "100 km/h",
+      "110 km/h",
+      "120 km/h",
+      "130 km/h"
+    ],
+    "a": 3,
+    "exp": "Art. 51 inc. d Ley 24.449: en autopistas los automóviles pueden circular hasta 130 km/h. Esta es la velocidad máxima legal; si hay señalización específica menor, ésta prevalece. Salvo señalización que indique un limite menor. Para camiónes y vehículos de transporte el limite es inferior."
+  },
+  {
+    "id": 71,
+    "cat": "Velocidades especificas",
+    "img": "",
+    "q": "Cuál es el limite de velocidad en zonas semiurbanas (accesos a ciudades con edificacion de un solo lado)?",
+    "opts": [
+      "40 km/h",
+      "60 km/h",
+      "80 km/h",
+      "100 km/h"
+    ],
+    "a": 2,
+    "exp": "En zonas semiurbanas, es decir los accesos a localidades con edificacion de un solo lado de la calzada, la velocidad máxima es de 80 km/h salvo señalización diferente."
+  },
+  {
+    "id": 72,
+    "cat": "Velocidades especificas",
+    "img": "",
+    "q": "Ante condiciones meteorologicas adversas como lluvia intensa, niebla o granizo, el conductor debe:",
+    "opts": [
+      "Mantener la velocidad reglamentaria porque los limites ya contemplan estas situaciónes",
+      "Reducir la velocidad por debajo del limite legal si las condiciones lo requieren",
+      "Aumentar la velocidad para salir rápido de la zona de peligro",
+      "Encender las luces de emergencia y continuar a la misma velocidad"
+    ],
+    "a": 1,
+    "exp": "El conductor debe adaptar la velocidad a las condiciones reales de la via. Puede y debe circular por debajo del limite legal cuando las condiciones de visibilidad, adherencia o tráfico asi lo exigen."
+  },
+  {
+    "id": 73,
+    "cat": "Ciclistas y peatónes",
+    "img": "",
+    "q": "En una intersección sin semáforo ni señalización, quien tiene prioridad de paso?",
+    "opts": [
+      "El vehículo mas grande",
+      "El vehículo que lleva mas velocidad",
+      "El peatón y el ciclista sobre los vehículos motorizados",
+      "El vehículo que viene desde la derecha"
+    ],
+    "a": 2,
+    "exp": "Los peatónes y ciclistas son usuarios vulnerables y tienen prioridad de paso sobre los vehículos motorizados en intersecciónes, cruces peatónales y situaciónes donde deban compartir el espacio vial."
+  },
+  {
+    "id": 74,
+    "cat": "Ciclistas y peatónes",
+    "img": "",
+    "q": "Donde deben circular las bicicletas cuando existe carril bici habilitado?",
+    "opts": [
+      "Pueden elegir entre el carril bici o la calzada segun prefieran",
+      "Deben utilizar obligatoriamente el carril bici cuando este este habilitado",
+      "Solo si llevan casco deben usar el carril bici",
+      "En la vereda si es mas seguro"
+    ],
+    "a": 1,
+    "exp": "Cuando existe carril bici habilitado, los ciclistas deben utilizarlo obligatoriamente. Solo pueden circular por la calzada cuando el carril bici no esta disponible o en situaciónes especiales."
+  },
+  {
+    "id": 75,
+    "cat": "Ciclistas y peatónes",
+    "img": "",
+    "q": "El conductor debe ceder el paso a los peatónes en la senda peatónal:",
+    "opts": [
+      "Solo si el semáforo peatónal esta en verde",
+      "Siempre, independientemente del color del semáforo vehicular",
+      "Solo cuando el peatón ya empezo a cruzar",
+      "Solo en zonas escolares"
+    ],
+    "a": 1,
+    "exp": "El conductor debe ceder el paso a los peatónes en la senda peatónal siempre, incluso con semáforo vehicular en verde si el peatón ya esta cruzando o esta por cruzar. El peatón tiene prioridad en la senda."
+  },
+  {
+    "id": 76,
+    "cat": "Ciclistas y peatónes",
+    "img": "",
+    "q": "Qué obligación tiene el conductor al apróximarse a una senda peatónal donde hay un peatón esperando cruzar?",
+    "opts": [
+      "Continuar si el semáforo vehicular esta en verde",
+      "Tocar bocina para avisar al peatón que va a pasar",
+      "Reducir la velocidad y ceder el paso al peatón",
+      "Acelerar para cruzar antes que el peatón llegue a la calzada"
+    ],
+    "a": 2,
+    "exp": "Al apróximarse a una senda peatónal con un peatón esperando, el conductor debe reducir la velocidad y ceder el paso. El peatón tiene prioridad sobre los vehículos en la senda peatónal."
+  },
+  {
+    "id": 77,
+    "cat": "Ciclistas y peatónes",
+    "img": "",
+    "q": "Los ciclistas menores de que edad deben circular obligatoriamente con casco?",
+    "opts": [
+      "Menores de 12 años",
+      "Menores de 16 años",
+      "Menores de 18 años",
+      "El casco es obligatorio para todas las edades en bicicleta"
+    ],
+    "a": 3,
+    "exp": "En la Provincia de Buenos Aires y el Municipio de San Fernando, el uso de casco es obligatorio para ciclistas de todas las edades. La Ley 24.449 (Art. 40) lo exige expresamente para motociclistas; para ciclistas rige la normativa provincial y municipal. Segun la Ley Nacional de Transito. Ademas deben llevar luces y elementos reflectivos para circular de noche."
+  },
+  {
+    "id": 78,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_122.png",
+    "q": "¿Qué anticipa esta señal?",
+    "opts": [
+      "Proximidad de una señal de Pare a 200 metros",
+      "Inicio de control policial",
+      "Cruce ferroviario próximo",
+      "Prohibición de avanzar"
+    ],
+    "a": 0,
+    "exp": "Esta señal preventiva indica que a 200 metros hay una señal de PARE. El conductor debe prepararse para detenerse completamente antes del cruce."
+  },
+  {
+    "id": 79,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_121.png",
+    "q": "¿Qué anticipa esta señal?",
+    "opts": [
+      "Proximidad de una señal de Pare",
+      "Proximidad de una señal de Ceda el Paso a 200 metros",
+      "Ingreso a autopista",
+      "Fin de restricción"
+    ],
+    "a": 1,
+    "exp": "Esta señal preventiva advierte que a 200 metros habrá una señal de Ceda el Paso. Reducir velocidad y prepararse para ceder."
+  },
+  {
+    "id": 80,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_125.png",
+    "q": "¿Qué advierte esta señal?",
+    "opts": [
+      "Cruce ferroviario",
+      "Proximidad de semáforo",
+      "Zona escolar",
+      "Control policial"
+    ],
+    "a": 1,
+    "exp": "Esta señal advierte la proximidad de un semáforo. Prepararse para detenerse si está en rojo al llegar."
+  },
+  {
+    "id": 81,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_120.png",
+    "q": "¿Qué indica esta señal?",
+    "opts": [
+      "Carril exclusivo para transporte público",
+      "Prohibición inmediata de circular camiónes",
+      "Proximidad de restricción para transporte público a 500 metros",
+      "Prohibición de estacionar transporte público"
+    ],
+    "a": 2,
+    "exp": "Esta señal informa que a 500 metros habrá una restricción de circulación para el transporte público."
+  },
+  {
+    "id": 82,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_124.png",
+    "q": "¿Qué indica esta señal?",
+    "opts": [
+      "Curva pronunciada hacia la izquierda con panel direcciónal",
+      "Giro obligatorio a la izquierda",
+      "Desvío por obras",
+      "Cambio de sentido de circulación"
+    ],
+    "a": 0,
+    "exp": "Esta señal indica la presencia de una curva pronunciada hacia la izquierda, acompañada de un panel direcciónal de advertencia."
+  },
+  {
+    "id": 83,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p11_sign_129.png",
+    "q": "¿Qué tipo de vía identifica esta señal?",
+    "opts": [
+      "Ruta nacional",
+      "Autopista",
+      "Camino rural",
+      "Avenida"
+    ],
+    "a": 1,
+    "exp": "Esta señal informativa identifica una autopista. En autopistas rigen normas especiales de velocidad y circulación."
+  },
+  {
+    "id": 84,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p11_sign_134.png",
+    "q": "¿Qué información brinda esta señal?",
+    "opts": [
+      "Límite de velocidad",
+      "Distancia y destino",
+      "Zona turística",
+      "Ruta alternativa"
+    ],
+    "a": 1,
+    "exp": "Esta señal informativa de orientación indica la distancia y el destino. Es fundamental para la orientación del conductor en ruta."
+  },
+  {
+    "id": 85,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_143.png",
+    "q": "¿Qué indica esta señal?",
+    "opts": [
+      "Camino o calle sin salida",
+      "Esquema de recorrido",
+      "Desvío por cambio de sentido de circulación",
+      "Dirección obligatoria hacia adelante"
+    ],
+    "a": 2,
+    "exp": "Esta señal indica un desvío generado por un cambio de sentido de circulación. El conductor debe seguir el recorrido alternativo indicado."
+  },
+  {
+    "id": 86,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_144.png",
+    "q": "¿Qué representa esta señal?",
+    "opts": [
+      "Esquema de recorrido",
+      "Prohibido girar a la izquierda",
+      "Desvío por cambio de sentido de circulación",
+      "Inicio de doble circulación"
+    ],
+    "a": 0,
+    "exp": "Esta señal muestra el esquema del recorrido que debe seguir el conductor, indicando el trayecto habilitado en esa intersección."
+  },
+  {
+    "id": 87,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_149.png",
+    "q": "¿Qué indica esta señal?",
+    "opts": [
+      "Fin de autopista",
+      "Indicador de utilización de carriles",
+      "Dirección obligatoria en tres sentidos",
+      "Carril exclusivo para transporte pesado"
+    ],
+    "a": 1,
+    "exp": "Esta señal indica la utilización de carriles, informando al conductor qué maniobras puede realizar desde cada carril."
+  },
+  {
+    "id": 88,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_150.png",
+    "q": "¿Qué indica esta señal?",
+    "opts": [
+      "Comienzo de autopista",
+      "Autopista con peaje",
+      "Fin de autopista",
+      "Prohibición de adelantamiento"
+    ],
+    "a": 2,
+    "exp": "Esta señal indica el fin de la autopista. A partir de ese punto rigen las normas de circulación de una vía ordinaria."
+  },
+  {
+    "id": 89,
+    "cat": "Señal de tránsito",
+    "img": "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_151.png",
+    "q": "¿Qué indica esta señal?",
+    "opts": [
+      "Comienzo de autopista",
+      "Ruta nacional",
+      "Carril exclusivo",
+      "Ingreso a zona urbana"
+    ],
+    "a": 0,
+    "exp": "Esta señal indica el comienzo de una autopista. El conductor ingresa a una vía de alta velocidad con accesos y salidas controladas."
+  }
+];
+
+var SIGNS_REPO = ["https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_120.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_121.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_122.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_123.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_124.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_125.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p11_sign_129.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p11_sign_134.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_143.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_144.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_147.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_148.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_149.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_150.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_151.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p13_sign_154.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p13_sign_155.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p13_sign_156.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p13_sign_157.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p13_sign_158.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p13_sign_159.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p13_sign_160.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p13_sign_161.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p13_sign_162.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p14_sign_185.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p14_sign_186.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p14_sign_187.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p14_sign_188.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p14_sign_189.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p15_sign_192.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p15_sign_193.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p15_sign_194.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p15_sign_195.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p15_sign_196.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p15_sign_197.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p16_sign_206.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p16_sign_207.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p18_sign_231.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_1.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_10.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_11.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_12.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_13.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_14.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_15.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_16.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_17.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_18.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_19.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_2.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_20.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_3.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_4.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_5.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_6.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_7.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_8.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p2_sign_9.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_23.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_24.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_25.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_26.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_27.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_28.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_29.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_30.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_31.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_32.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_33.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p3_sign_34.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_37.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_38.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_39.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_40.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_41.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_42.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_43.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_44.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_45.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_46.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_47.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_48.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_49.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p4_sign_50.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p5_sign_53.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p5_sign_57.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p5_sign_58.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p5_sign_59.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p6_sign_62.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p6_sign_63.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p6_sign_64.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p6_sign_66.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p6_sign_68.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p6_sign_70.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p6_sign_71.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_74.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_75.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_76.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_77.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_78.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_79.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_80.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_81.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_82.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_83.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p7_sign_84.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_87.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_88.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_89.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_90.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_91.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_92.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_93.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_94.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_95.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_96.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p8_sign_97.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_100.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_101.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_102.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_103.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_104.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_105.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_106.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_107.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_108.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_109.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_110.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_111.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_112.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_113.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_114.png", "https://raw.githubusercontent.com/rolive86/senales-transito/main/p9_sign_115.png"];
+
+var currentId = null;
+var newCorrectIdx = 0;
+var activeFilter = 'Todas';
+
+// ── INIT ──
+function init(){
+  updateStats();
+  buildFilterChips();
+  renderList();
+  // Populate new-cat select
+  var cats = getCats();
+  var sel = document.getElementById('new-cat');
+  cats.forEach(function(c){
+    var o = document.createElement('option'); o.value=c; o.textContent=c; sel.appendChild(o);
+  });
+}
+
+function getCats(){
+  var cats = ['Todas'].concat([...new Set(BANK.map(function(q){return q.cat}))].sort());
+  return cats;
+}
+
+function updateStats(){
+  document.getElementById('stat-total').textContent = BANK.length;
+  document.getElementById('stat-img').textContent = BANK.filter(function(q){return q.img}).length;
+}
+
+// ── FILTER CHIPS ──
+function buildFilterChips(){
+  var row = document.getElementById('filterRow');
+  row.innerHTML = '';
+  var cats = getCats();
+  cats.forEach(function(cat){
+    var chip = document.createElement('button');
+    chip.className = 'filter-chip' + (cat === activeFilter ? ' active' : '');
+    chip.textContent = cat === 'Todas' ? 'Todas' : cat.split(' ')[0];
+    chip.title = cat;
+    chip.onclick = function(){activeFilter=cat; buildFilterChips(); renderList();};
+    row.appendChild(chip);
+  });
+}
+
+// ── SIDEBAR LIST ──
+function renderList(){
+  var search = document.getElementById('searchInput').value.toLowerCase();
+  var list = document.getElementById('sidebarList');
+  list.innerHTML = '';
+  
+  BANK.forEach(function(q){
+    if(activeFilter !== 'Todas' && q.cat !== activeFilter) return;
+    if(search && !q.q.toLowerCase().includes(search) && !q.cat.toLowerCase().includes(search)) return;
+    
+    var item = document.createElement('div');
+    item.className = 'q-item' + (q.id === currentId ? ' active' : '') + (q.img ? ' has-img' : '');
+    item.innerHTML = '<div class="q-item-num">#' + q.id + '</div>' +
+      '<div class="q-item-text">' + escHtml(q.q) + '</div>' +
+      '<span class="q-item-cat">' + q.cat + '</span>';
+    item.onclick = function(){editQuestion(q.id)};
+    list.appendChild(item);
+  });
+}
+
+function filterList(){ renderList(); }
+
+// ── EDITOR ──
+function editQuestion(id){
+  currentId = id;
+  var q = BANK.find(function(x){return x.id===id});
+  if(!q) return;
+  
+  renderList(); // update active state
+  
+  var letters = ['A','B','C','D','E'];
+  var catColor = getCatColor(q.cat);
+  
+  var html = '<div class="editor-header">' +
+    '<div><div class="editor-id">#' + q.id + '</div>' +
+    '<div class="editor-title">' + escHtml(q.q.substring(0,60)) + (q.q.length>60?'...':'') + '</div></div>' +
+    '<div class="btn-group">' +
+    '<button class="btn btn-danger" onclick="deleteQuestion(' + q.id + ')">🗑 Eliminar</button>' +
+    '<button class="btn btn-primary" onclick="saveQuestion(' + q.id + ')">✓ Guardar</button>' +
+    '</div></div>';
+  
+  // Category
+  html += '<div class="field"><label class="field-label">Categoría</label>' +
+    '<select class="field-select" id="edit-cat">';
+  getCats().filter(function(c){return c!=='Todas'}).forEach(function(c){
+    html += '<option value="' + escHtml(c) + '"' + (c===q.cat?' selected':'') + '>' + escHtml(c) + '</option>';
+  });
+  html += '</select></div>';
+  
+  // Question text
+  html += '<div class="field"><label class="field-label">Pregunta</label>' +
+    '<textarea class="field-textarea" id="edit-q" style="min-height:100px">' + escHtml(q.q) + '</textarea></div>';
+  
+  // Image
+  html += '<div class="img-section">' +
+    '<label class="field-label" style="margin-bottom:12px">Imagen de señal (opcional)</label>' +
+    '<div class="img-preview-wrap">';
+  
+  if(q.img){
+    html += '<img class="img-preview" id="img-preview-el" src="' + escHtml(q.img) + '" style="max-width:120px;max-height:120px;object-fit:contain" onerror="this.className+=\'err\'">';
+  } else {
+    html += '<div class="img-preview empty" id="img-preview-el">🖼️</div>';
+  }
+  
+  html += '<div class="img-controls">' +
+    '<div class="img-url-row">' +
+    '<input class="field-input img-url-input" id="edit-img" placeholder="URL de imagen o vacío para sin imagen" ' +
+    'value="' + escHtml(q.img||'') + '" oninput="previewImg()">' +
+    '</div>' +
+    (q.img ? '<div><span class="img-badge">🔗 GitHub</span></div>' : '') +
+    '<div style="display:flex;gap:6px;margin-top:6px">' +
+    '<button class="btn btn-ghost" onclick="openSignPicker(false)" style="font-size:12px;padding:6px 10px;flex:1">🖼️ Elegir del repositorio</button>' +
+    '<button class="btn btn-ghost" onclick="clearImg()" style="font-size:12px;padding:6px 10px">✕ Quitar</button>' +
+    '</div>' +
+    '</div></div></div>';
+  
+  // Options
+  html += '<div class="field"><label class="field-label">Opciones — clic en la letra para marcar la correcta</label>' +
+    '<div class="opts-editor" id="edit-opts">';
+  
+  q.opts.forEach(function(opt, i){
+    var isCorrect = i === q.a;
+    html += '<div class="opt-row' + (isCorrect?' correct-row':'') + '" data-idx="' + i + '">' +
+      '<span class="opt-letter' + (isCorrect?' correct':'') + '" onclick="setCorrect(' + id + ',' + i + ')">' + letters[i] + '</span>' +
+      '<input class="opt-input" id="edit-opt-' + i + '" value="' + escHtml(opt) + '">' +
+      '<button class="opt-remove" onclick="removeOpt(' + id + ',' + i + ')">✕</button>' +
+      '</div>';
+  });
+  
+  html += '</div>' +
+    '<button class="btn btn-ghost" onclick="addOpt(' + id + ')" style="font-size:12px;margin-top:6px">+ Agregar opción</button>' +
+    '<div class="reorder-hint">Arrastrá las opciones para reordenarlas (próximamente)</div>' +
+    '</div>';
+  
+  // Explanation
+  html += '<div class="field"><label class="field-label">Explicación (se muestra al responder)</label>' +
+    '<textarea class="field-textarea" id="edit-exp" style="min-height:120px">' + escHtml(q.exp) + '</textarea></div>';
+  
+  // Action buttons bottom
+  html += '<div style="display:flex;justify-content:flex-end;gap:8px;padding-top:8px">' +
+    '<button class="btn btn-danger" onclick="deleteQuestion(' + id + ')">🗑 Eliminar pregunta</button>' +
+    '<button class="btn btn-primary" onclick="saveQuestion(' + id + ')">✓ Guardar cambios</button>' +
+    '</div>';
+
+  document.getElementById('editor').innerHTML = html;
+}
+
+// ── SAVE ──
+function saveQuestion(id){
+  var q = BANK.find(function(x){return x.id===id});
+  if(!q) return;
+  
+  q.cat  = document.getElementById('edit-cat').value;
+  q.q    = document.getElementById('edit-q').value.trim();
+  q.img  = document.getElementById('edit-img').value.trim();
+  q.exp  = document.getElementById('edit-exp').value.trim();
+  
+  // Save opts
+  var opts = [];
+  document.querySelectorAll('#edit-opts .opt-input').forEach(function(inp){
+    opts.push(inp.value.trim());
+  });
+  q.opts = opts;
+  
+  updateStats();
+  renderList();
+  showToast('✓ Pregunta #' + id + ' guardada');
+}
+
+// ── CORRECT ANSWER ──
+function setCorrect(id, idx){
+  var q = BANK.find(function(x){return x.id===id});
+  if(!q) return;
+  q.a = idx;
+  
+  // Update UI
+  document.querySelectorAll('#edit-opts .opt-row').forEach(function(row, i){
+    row.classList.toggle('correct-row', i===idx);
+    row.querySelector('.opt-letter').classList.toggle('correct', i===idx);
+  });
+  showToast('✓ Respuesta correcta: opción ' + ['A','B','C','D'][idx]);
+}
+
+// ── OPTIONS ──
+function addOpt(id){
+  var q = BANK.find(function(x){return x.id===id});
+  if(!q || q.opts.length >= 5) return;
+  q.opts.push('Nueva opción');
+  editQuestion(id);
+}
+
+function removeOpt(id, idx){
+  var q = BANK.find(function(x){return x.id===id});
+  if(!q || q.opts.length <= 2) return;
+  q.opts.splice(idx, 1);
+  if(q.a >= q.opts.length) q.a = 0;
+  editQuestion(id);
+}
+
+// ── IMAGE ──
+function previewImg(){
+  var url = document.getElementById('edit-img').value.trim();
+  var el = document.getElementById('img-preview-el');
+  if(!el) return;
+  if(url){
+    el.outerHTML = '<img class="img-preview" id="img-preview-el" src="' + escHtml(url) + '" onerror="this.style.opacity=.3">';
+  } else {
+    el.outerHTML = '<div class="img-preview empty" id="img-preview-el">🖼️</div>';
+  }
+}
+
+function clearImg(){
+  document.getElementById('edit-img').value = '';
+  previewImg();
+}
+
+// ── DELETE ──
+function deleteQuestion(id){
+  if(!confirm('¿Eliminar la pregunta #' + id + '? Esta acción no se puede deshacer.')) return;
+  BANK = BANK.filter(function(q){return q.id!==id});
+  currentId = null;
+  document.getElementById('editor').innerHTML = '<div class="editor-empty"><div class="editor-empty-icon">🗑</div><div class="editor-empty-txt">Pregunta eliminada</div></div>';
+  updateStats();
+  renderList();
+  showToast('Pregunta eliminada', true);
+}
+
+// ── ADD NEW ──
+function showAddPanel(){
+  newCorrectIdx = 0;
+  setNewCorrect(0);
+  document.querySelectorAll('#new-opts .opt-input').forEach(function(inp){ inp.value=''; });
+  document.getElementById('new-q').value = '';
+  document.getElementById('new-exp').value = '';
+  document.getElementById('new-img').value = '';
+  document.getElementById('addPanel').classList.add('show');
+}
+function closeAddPanel(){ document.getElementById('addPanel').classList.remove('show'); }
+
+function setNewCorrect(idx){
+  newCorrectIdx = idx;
+  document.querySelectorAll('#new-opts .opt-letter').forEach(function(el, i){
+    el.classList.toggle('correct', i===idx);
+    el.closest('.opt-row').classList.toggle('correct-row', i===idx);
+  });
+}
+
+function saveNewQuestion(){
+  var q = document.getElementById('new-q').value.trim();
+  var exp = document.getElementById('new-exp').value.trim();
+  var cat = document.getElementById('new-cat').value;
+  var img = document.getElementById('new-img').value.trim();
+  var opts = [];
+  document.querySelectorAll('#new-opts .opt-input').forEach(function(inp){ opts.push(inp.value.trim()); });
+  
+  if(!q || opts.some(function(o){return !o})){
+    showToast('Completá la pregunta y todas las opciones', true); return;
+  }
+  
+  var maxId = Math.max.apply(null, BANK.map(function(x){return x.id}));
+  BANK.push({ id: maxId+1, cat: cat, img: img, q: q, opts: opts, a: newCorrectIdx, exp: exp });
+  
+  closeAddPanel();
+  updateStats();
+  buildFilterChips();
+  renderList();
+  editQuestion(maxId+1);
+  showToast('✓ Pregunta #' + (maxId+1) + ' agregada');
+}
+
+// ── EXPORT ──
+function exportBank(){
+  var lines = BANK.map(function(q){
+    var opts = q.opts.map(function(o){return '"'+o.replace(/"/g,'\"')+'"'}).join(',');
+    var imgPart = q.img ? 'img:"'+q.img.replace(/"/g,'\"')+'",' : '';
+    return '{cat:"'+q.cat.replace(/"/g,'\"')+'",'+imgPart+
+      'q:"'+q.q.replace(/"/g,'\"')+'",'+
+      'opts:['+opts+'],'+
+      'a:'+q.a+','+
+      'exp:"'+q.exp.replace(/"/g,'\"')+'"}';
+  });
+  var bankJs = 'var BANK=[\n' + lines.join(',\n') + '\n];';
+  
+  // Download as file — UTF-8 explicit
+  var encoder = new TextEncoder();
+  var bytes = encoder.encode(bankJs);
+  var blob = new Blob([bytes], {type:'text/javascript;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'bank_actualizado.js';
+  a.click();
+  showToast('✓ Banco exportado como bank_actualizado.js');
+}
+
+// ── UTILS ──
+function escHtml(str){
+  if(!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg, isError){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError ? ' error' : '');
+  t.style.display = 'block';
+  setTimeout(function(){t.style.display='none'}, 2500);
+}
+
+function getCatColor(cat){
+  var colors = {
+    'Señal de tránsito':'#0088C8','Normas de conducción':'#E89000',
+    'Licencia de conducir':'#00c853','Alcohol y drogas':'#ff3b5c',
+    'Elementos de seguridad':'#ff8c00','Responsabilidad vial':'#f50057',
+    'Motovehículos':'#00bcd4','Transporte profesional':'#8bc34a',
+    'Distancias de seguridad':'#ffd600','Estacionamiento':'#ff6d00',
+    'Velocidades especificas':'#e040fb','Ciclistas y peatónes':'#76ff03',
+    'Semáforos':'#ffab40','Documentacion':'#80cbc4'
+  };
+  return colors[cat] || '#8b91a8';
+}
+
+
+// ── THEME TOGGLE ──
+function toggleTheme(){
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if(isDark){
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.setItem('bo-theme', 'light');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('bo-theme', 'dark');
+  }
+  syncThemeToggleLabel();
+}
+
+function syncThemeToggleLabel(){
+  var btn = document.getElementById('theme-toggle');
+  if(!btn) return;
+  var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  btn.textContent = isDark ? '☀️ Modo claro' : '🌙 Modo oscuro';
+}
+
+// Load saved theme on start (default: light / fondo blanco)
+(function(){
+  var saved = localStorage.getItem('bo-theme') || 'light';
+  if(saved === 'dark'){
+    document.documentElement.setAttribute('data-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  document.addEventListener('DOMContentLoaded', syncThemeToggleLabel);
+})();
+
+// ── START ──
+document.addEventListener("DOMContentLoaded", init);
+
+// ── SIGN PICKER ──
+var _signPickerTarget = false; // false = edit mode, true = new question mode
+var _selectedSignUrl = null;
+
+function openSignPicker(isNew){
+  _signPickerTarget = isNew;
+  _selectedSignUrl = null;
+  document.getElementById('signPickerConfirm').disabled = true;
+  document.getElementById('signSearch').value = '';
+  renderSignGrid(SIGNS_REPO);
+  document.getElementById('signPickerModal').classList.add('show');
+}
+
+function closeSignPicker(){
+  document.getElementById('signPickerModal').classList.remove('show');
+}
+
+function renderSignGrid(signs){
+  var grid = document.getElementById('signGrid');
+  grid.innerHTML = '';
+  signs.forEach(function(url){
+    var fname = url.split('/').pop();
+    var div = document.createElement('div');
+    div.className = 'sign-thumb';
+    div.innerHTML = '<img src="' + url + '" loading="lazy" onerror="this.style.opacity=\'0.2\'">' +
+      '<span class="sign-thumb-name">' + fname.replace('.png','') + '</span>';
+    div.onclick = function(){
+      document.querySelectorAll('.sign-thumb').forEach(function(t){t.classList.remove('selected')});
+      div.classList.add('selected');
+      _selectedSignUrl = url;
+      document.getElementById('signPickerConfirm').disabled = false;
+    };
+    grid.appendChild(div);
+  });
+}
+
+function filterSigns(){
+  var q = document.getElementById('signSearch').value.toLowerCase();
+  var filtered = SIGNS_REPO.filter(function(url){
+    return !q || url.toLowerCase().includes(q);
+  });
+  renderSignGrid(filtered);
+}
+
+function confirmSignPicker(){
+  if(!_selectedSignUrl) return;
+  if(_signPickerTarget){
+    // New question panel
+    document.getElementById('new-img').value = _selectedSignUrl;
+  } else {
+    // Edit panel
+    var el = document.getElementById('edit-img');
+    if(el){
+      el.value = _selectedSignUrl;
+      previewImg();
+    }
+  }
+  closeSignPicker();
+  showToast('✓ Señal seleccionada');
+}
+
+</script>
+</body>
+</html>

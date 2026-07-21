@@ -1,0 +1,1703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<title>Test de Manejo — San Fernando Municipio</title>
+<link rel="icon" href="assets/sanfer-isotipo.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/sanfer-isotipo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{font-size:16px;scroll-behavior:smooth}
+body{
+  background:#ffffff;
+  color:#181008;
+  font-family:'Archivo',sans-serif;
+  height:100dvh;
+  overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── DESIGN TOKENS — San Fernando Municipio (azul + naranja, fondo blanco) ── */
+:root{
+  --white:  #ffffff;
+  --ink:    #0088C8;
+  --ink2:   #2868A8;
+  --muted:  #7a8494;
+  --border: #e8eef4;
+  --border2:#c8d4e0;
+
+  /* Marca San Fernando */
+  --brand-blue:   #0088C8;
+  --brand-blue-dk:#2868A8;
+  --brand-orange: #E89000;
+  --px-yellow: #E89000;
+  --px-orange: #E09030;
+  --px-red:    #ff2d55;
+  --px-green:  #00c853;
+  --px-blue:   #0088C8;
+  --px-purple: #aa00ff;
+  --px-cyan:   #40A0D8;
+
+  /* Semantic */
+  --correct: #00c853;
+  --correct-bg: #f0fff6;
+  --wrong:   #ff2d55;
+  --wrong-bg:#fff0f3;
+  --combo:   #E89000;
+
+  /* Pixel shadow — blocky feel */
+  --px-shadow: 3px 3px 0px #2868A8;
+  --px-shadow-sm: 2px 2px 0px #2868A8;
+  --px-shadow-color: 3px 3px 0px;
+
+  --r: 16px;
+  --r-sm: 10px;
+}
+
+/* ── SCREENS ── */
+.screen{display:none;flex-direction:column;min-height:100dvh;overflow:hidden;visibility:hidden;position:fixed;inset:0}
+.screen.active{display:flex;position:fixed;inset:0;overflow:hidden;z-index:1;visibility:visible}
+
+/* ── PIXEL DECORATIONS ── */
+.px-dot{
+  display:inline-block;
+  width:8px;height:8px;
+  background:currentColor;
+  image-rendering:pixelated;
+}
+.px-border{
+  border:2.5px solid var(--ink);
+  box-shadow:var(--px-shadow);
+}
+.px-border-sm{
+  border:2px solid var(--ink);
+  box-shadow:var(--px-shadow-sm);
+}
+
+/* ── WELCOME SCREEN ── */
+#welcome{
+  background:#ffffff;
+  padding:0 24px;
+  padding-top:env(safe-area-inset-top,16px);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.welcome-inner{
+  flex:1;display:flex;flex-direction:column;
+  justify-content:space-between;
+  padding:20px 0 20px;
+  position:relative;
+  overflow:hidden;
+}
+
+/* Soft brand wash — fondo blanco de marca + acento azul suave */
+.pixel-bg{
+  position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(ellipse 80% 50% at 100% 0%, rgba(0,136,200,.07), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 0% 100%, rgba(232,144,0,.06), transparent 50%),
+    #ffffff;
+}
+
+/* Logo/title area */
+.game-logo{
+  position:relative;z-index:1;
+  margin-bottom:12px;
+  text-align:left;
+}
+.game-logo-sub{
+  font-family:'Press Start 2P', monospace;
+  font-size:9px;
+  color:#0088C8;
+  letter-spacing:1px;
+  margin-bottom:12px;
+  display:block;
+}
+.game-title{
+  font-size:clamp(38px,10vw,56px);
+  font-weight:900;
+  line-height:1.0;
+  letter-spacing:-2px;
+  color:var(--ink);
+  margin-bottom:4px;
+}
+.game-title .hl{
+  color:#E89000;
+  -webkit-text-stroke:2px #2868A8;
+  paint-order:stroke fill;
+}
+.game-title-municipio{
+  font-family:'Press Start 2P', monospace;
+  font-size:8px;
+  color:var(--muted);
+  letter-spacing:1px;
+  display:block;
+  margin-top:10px;
+}
+
+.brand-logo{
+  display:block;
+  height:auto;
+}
+.brand-logo--welcome{
+  max-width:min(100%,320px);
+  margin-bottom:4px;
+}
+.brand-logo--hud{
+  width:28px;
+  height:28px;
+  object-fit:contain;
+  border-radius:6px;
+  background:#fff;
+  border:1.5px solid rgba(255,255,255,.55);
+  flex-shrink:0;
+  padding:1px;
+}
+.brand-logo--footer,.brand-logo--modal{
+  max-width:260px;
+  width:100%;
+  margin-left:auto;
+  margin-right:auto;
+}
+
+/* Pixel car decoration */
+.pixel-car{
+  position:relative;z-index:1;
+  text-align:center;
+  margin:8px 0;
+  font-size:52px;
+  line-height:1;
+  animation:carBounce 1s ease-in-out infinite alternate;
+}
+@keyframes carBounce{
+  from{transform:translateY(0)}
+  to{transform:translateY(-8px)}
+}
+
+/* Stats row */
+.stats-row{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:8px;margin-bottom:12px;
+  position:relative;z-index:1;
+}
+.stat-card{
+  background:#fff;
+  border:2.5px solid var(--ink);
+  box-shadow:var(--px-shadow);
+  border-radius:var(--r-sm);
+  padding:14px 10px;
+  text-align:center;
+}
+.stat-val{
+  font-family:'Press Start 2P', monospace;
+  font-size:18px;
+  color:#2868A8;
+  display:block;line-height:1;margin-bottom:6px;
+}
+.stat-lbl{
+  font-size:10px;color:var(--muted);
+  text-transform:uppercase;letter-spacing:1px;font-weight:700;
+}
+
+/* Mode chips */
+.mode-chips{
+  display:flex;gap:6px;flex-wrap:wrap;
+  margin-bottom:12px;position:relative;z-index:1;
+}
+.chip{
+  display:flex;align-items:center;gap:6px;
+  background:#fff;
+  border:2px solid var(--ink);
+  box-shadow:2px 2px 0 var(--ink);
+  border-radius:6px;
+  padding:6px 12px;
+  font-size:12px;font-weight:700;
+  color:var(--ink);
+}
+.chip-dot{width:8px;height:8px;border-radius:0;display:inline-block}
+
+/* Start button */
+.start-btn{
+  width:100%;padding:20px;
+  background:#0088C8;
+  color:#fff;
+  font-family:'Archivo',sans-serif;
+  font-size:18px;font-weight:900;
+  border:2.5px solid #2868A8;
+  box-shadow:4px 4px 0 #E89000;
+  border-radius:var(--r);
+  cursor:pointer;
+  letter-spacing:-0.5px;
+  touch-action:manipulation;
+  transition:transform .1s,box-shadow .1s;
+  position:relative;z-index:1;
+  text-transform:uppercase;
+}
+.start-btn:active{
+  transform:translate(2px,2px);
+  box-shadow:2px 2px 0 #E89000;
+}
+
+/* ── HUD TOP BAR ── */
+.hud{
+  position:sticky;top:0;z-index:20;
+  background:#fff;
+  border-bottom:2.5px solid var(--ink);
+  padding:10px 16px;
+  flex-shrink:0;
+  padding-top:max(10px,env(safe-area-inset-top));
+}
+
+/* Round indicator */
+.hud-round{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.round-label{
+  font-family:'Press Start 2P', monospace;
+  font-size:8px;
+  color:var(--muted);
+  letter-spacing:1px;
+}
+.round-pips{
+  display:flex;gap:5px;
+}
+.round-pip{
+  width:20px;height:8px;
+  border:2px solid var(--ink);
+  border-radius:2px;
+  background:#fff;
+  transition:background .3s;
+}
+.round-pip.done{background:#E89000}
+.round-pip.active{background:#0088C8;animation:pipPulse .8s infinite alternate}
+@keyframes pipPulse{from{opacity:1}to{opacity:.5}}
+
+/* HUD main row */
+.hud-row{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+
+/* Timers */
+.hud-timers{display:flex;gap:6px}
+.hud-timer{
+  display:flex;align-items:center;gap:6px;
+  background:#f5f5fa;
+  border:2px solid var(--ink);
+  box-shadow:2px 2px 0 var(--ink);
+  border-radius:8px;
+  padding:5px 10px;
+}
+.hud-timer-ring{position:relative;width:28px;height:28px;flex-shrink:0}
+.hud-timer-ring svg{transform:rotate(-90deg);width:28px;height:28px}
+.ring-bg{fill:none;stroke:var(--border2);stroke-width:4}
+.ring-total{fill:none;stroke:#0088C8;stroke-width:4;stroke-linecap:square;transition:stroke-dashoffset .9s linear,stroke .3s}
+.ring-q{fill:none;stroke:#2868A8;stroke-width:4;stroke-linecap:square}
+.ring-val{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Press Start 2P', monospace;
+  font-size:7px;color:var(--ink);
+  line-height:1;
+}
+
+/* Score + steering */
+.hud-score{
+  display:flex;align-items:center;gap:6px;
+  background:#2868A8;
+  border:2px solid var(--ink);
+  box-shadow:2px 2px 0 rgba(0,0,0,.3);
+  border-radius:8px;
+  padding:5px 12px;
+}
+.hud-score-icon{font-size:18px;line-height:1}
+.hud-score-val{
+  font-family:'Press Start 2P', monospace;
+  font-size:13px;color:#fff;
+  line-height:1;
+}
+
+/* Combo badge */
+.combo-badge{
+  display:none;
+  position:fixed;top:50%;left:50%;
+  transform:translate(-50%,-50%) scale(0);
+  z-index:100;
+  background:var(--brand-orange);
+  border:3px solid var(--ink2);
+  box-shadow:5px 5px 0 var(--ink2);
+  border-radius:12px;
+  padding:16px 28px;
+  text-align:center;
+  pointer-events:none;
+}
+.combo-badge.show{
+  display:block;
+  animation:comboPop .6s cubic-bezier(.175,.885,.32,1.275) forwards;
+}
+@keyframes comboPop{
+  0%{transform:translate(-50%,-50%) scale(0);opacity:0}
+  60%{transform:translate(-50%,-50%) scale(1.1);opacity:1}
+  80%{transform:translate(-50%,-50%) scale(.95)}
+  100%{transform:translate(-50%,-50%) scale(1);opacity:0}
+}
+.combo-text{
+  font-family:'Press Start 2P', monospace;
+  font-size:22px;color:var(--ink);
+  display:block;margin-bottom:4px;
+}
+.combo-sub{
+  font-size:11px;font-weight:700;
+  color:var(--ink2);font-family:'Archivo',sans-serif;
+}
+
+/* Progress bar */
+.hud-prog{
+  margin-top:8px;
+  height:8px;
+  background:var(--border);
+  border:2px solid var(--ink);
+  border-radius:2px;
+  overflow:hidden;
+}
+.hud-prog-fill{
+  height:100%;
+  background:#0088C8;
+  border-radius:0;
+  transition:width .5s cubic-bezier(.4,0,.2,1);
+  background-image:repeating-linear-gradient(
+    90deg,
+    #0088C8 0, #0088C8 8px,
+    #E89000 8px, #E89000 16px
+  );
+  background-size:16px 100%;
+  animation:stripeMove .5s linear infinite;
+}
+@keyframes stripeMove{
+  from{background-position:0 0}
+  to{background-position:16px 0}
+}
+
+/* ── QUIZ BODY ── */
+.quiz-body{
+  flex:1;
+  padding:20px 20px 140px;
+  position:relative;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+#quiz{
+  height:100%;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+
+/* Question slide transition */
+.q-slide{
+  animation:slideInRight .3s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideInRight{
+  from{transform:translateX(40px);opacity:0}
+  to{transform:translateX(0);opacity:1}
+}
+.q-slide-out{
+  animation:slideOutLeft .25s cubic-bezier(.4,0,.2,1) forwards;
+}
+@keyframes slideOutLeft{
+  from{transform:translateX(0);opacity:1}
+  to{transform:translateX(-40px);opacity:0}
+}
+
+/* Question metadata */
+.q-meta{
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:14px;
+}
+.q-num{
+  font-family:'Press Start 2P', monospace;
+  font-size:10px;color:var(--muted);
+}
+.q-cat{
+  display:inline-block;
+  background:var(--border);
+  border:2px solid var(--ink);
+  border-radius:4px;
+  padding:3px 8px;
+  font-size:10px;font-weight:800;
+  color:var(--ink2);
+  text-transform:uppercase;letter-spacing:.8px;
+}
+
+/* Question image */
+.q-img-wrap{
+  display:none;
+  margin-bottom:16px;
+  text-align:center;
+}
+.q-img-wrap.visible{display:block}
+.q-img-wrap img{
+  max-width:240px;
+  max-height:240px;
+  width:auto;
+  height:auto;
+  object-fit:contain;
+  border:2.5px solid var(--ink);
+  box-shadow:var(--px-shadow);
+  border-radius:var(--r-sm);
+  background:#f8f8fc;
+  padding:10px;
+}
+
+/* Question text */
+.q-text{
+  font-size:clamp(17px,4.5vw,20px);
+  font-weight:800;
+  line-height:1.45;
+  letter-spacing:-.3px;
+  color:#181008;
+  margin-bottom:20px;
+  background:#eef7fc;
+  border:2.5px solid var(--ink);
+  box-shadow:var(--px-shadow);
+  border-radius:var(--r-sm);
+  padding:14px 16px;
+}
+
+/* Options */
+.opts-list{
+  display:flex;flex-direction:column;gap:10px;
+  margin-bottom:16px;
+}
+
+.opt-btn{
+  width:100%;
+  display:flex;align-items:center;gap:12px;
+  background:#fff;
+  border:2.5px solid var(--border2);
+  box-shadow:3px 3px 0 var(--border2);
+  border-radius:var(--r);
+  padding:14px 16px;
+  cursor:pointer;text-align:left;
+  touch-action:manipulation;
+  transition:transform .1s,box-shadow .1s,border-color .2s,background .2s;
+  position:relative;overflow:hidden;
+}
+.opt-btn:active:not(.locked){
+  transform:translate(1px,1px);
+  box-shadow:2px 2px 0 var(--border2);
+}
+
+.opt-letter{
+  width:36px;height:36px;
+  border:2px solid var(--ink);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Press Start 2P', monospace;
+  font-size:11px;font-weight:900;color:var(--ink);
+  background:#f5f5fa;
+  flex-shrink:0;
+  transition:background .2s,color .2s;
+}
+.opt-text{
+  font-size:15px;font-weight:700;
+  line-height:1.4;flex:1;color:#181008;
+}
+
+/* Correct state */
+.opt-btn.state-correct{
+  border-color:var(--correct);
+  background:var(--correct-bg);
+  box-shadow:3px 3px 0 var(--correct);
+}
+.opt-btn.state-correct .opt-letter{
+  background:var(--correct);border-color:var(--correct);color:#fff;
+}
+.opt-btn.state-correct .opt-text{color:var(--correct);font-weight:800}
+
+/* Wrong state */
+.opt-btn.state-wrong{
+  border-color:var(--wrong);
+  background:var(--wrong-bg);
+  box-shadow:3px 3px 0 var(--wrong);
+}
+.opt-btn.state-wrong .opt-letter{
+  background:var(--wrong);border-color:var(--wrong);color:#fff;
+}
+.opt-btn.state-wrong .opt-text{color:var(--wrong)}
+
+/* Dim state */
+.opt-btn.state-dim{opacity:.32}
+.opt-btn.locked{cursor:default}
+
+/* Feedback */
+.feedback-box{
+  display:none;
+  border-radius:var(--r-sm);
+  padding:13px 16px;
+  margin-bottom:16px;
+  border:2px solid var(--ink);
+}
+.feedback-box.visible{display:block;animation:feedSlide .25s ease}
+@keyframes feedSlide{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.feedback-box.fb-ok{background:var(--correct-bg);box-shadow:3px 3px 0 var(--correct)}
+.feedback-box.fb-ko{background:var(--wrong-bg);box-shadow:3px 3px 0 var(--wrong)}
+.fb-head{
+  font-family:'Press Start 2P', monospace;
+  font-size:11px;margin-bottom:6px;
+}
+.fb-ok .fb-head{color:var(--correct)}
+.fb-ko .fb-head{color:var(--wrong)}
+.fb-body{font-size:12px;line-height:1.55;color:var(--ink2);font-weight:500}
+
+/* ── FOOTER ── */
+.quiz-footer{
+  position:sticky;bottom:0;z-index:10;
+  background:#fff;
+  border-top:2.5px solid var(--ink);
+  padding:12px 20px;
+  padding-bottom:max(12px,env(safe-area-inset-bottom));
+  display:flex;gap:10px;
+}
+.nav-prev{
+  width:56px;height:56px;
+  background:#fff;
+  border:2.5px solid var(--ink);
+  box-shadow:3px 3px 0 var(--ink);
+  border-radius:var(--r-sm);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;cursor:pointer;
+  touch-action:manipulation;
+  transition:transform .1s,box-shadow .1s;
+  flex-shrink:0;
+}
+.nav-prev:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.nav-prev:disabled{opacity:.3;cursor:default}
+
+.nav-next{
+  flex:1;height:56px;
+  background:#2868A8;color:#fff;
+  border:2.5px solid var(--ink);
+  box-shadow:3px 3px 0 rgba(0,0,0,.4);
+  border-radius:var(--r-sm);
+  font-family:'Archivo',sans-serif;
+  font-size:16px;font-weight:900;
+  cursor:pointer;letter-spacing:-.3px;
+  touch-action:manipulation;
+  transition:transform .1s,box-shadow .1s;
+  text-transform:uppercase;
+}
+.nav-next:active:not(:disabled){transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.4)}
+.nav-next:disabled{opacity:.3;cursor:default}
+
+/* ── ROUND POPUP ── */
+.popup-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(26,26,46,.85);
+  align-items:center;justify-content:center;
+  padding:24px;
+}
+.popup-overlay.show{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.popup-card{
+  background:#fff;
+  border:3px solid var(--ink);
+  box-shadow:6px 6px 0 var(--ink);
+  border-radius:20px;
+  padding:28px 24px;
+  width:100%;max-width:360px;
+  text-align:center;
+  animation:popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes popIn{
+  from{transform:scale(.7);opacity:0}
+  to{transform:scale(1);opacity:1}
+}
+
+.popup-round-label{
+  font-family:'Press Start 2P', monospace;
+  font-size:9px;color:var(--muted);
+  letter-spacing:1px;margin-bottom:16px;display:block;
+}
+.popup-medal{font-size:72px;line-height:1;margin-bottom:12px;display:block;animation:medalSpin .6s ease}
+@keyframes medalSpin{from{transform:rotateY(-90deg)}to{transform:rotateY(0)}}
+.popup-score{
+  font-family:'Press Start 2P', monospace;
+  font-size:32px;color:var(--ink);
+  display:block;margin-bottom:4px;
+}
+.popup-score-lbl{font-size:13px;color:var(--muted);font-weight:600;margin-bottom:16px;display:block}
+.popup-msg{
+  font-size:15px;font-weight:700;color:var(--ink);
+  line-height:1.5;margin-bottom:24px;
+}
+.popup-stars{
+  display:flex;justify-content:center;gap:8px;
+  margin-bottom:20px;
+}
+.popup-star{font-size:28px;transition:transform .3s;animation:starPop .4s ease both}
+@keyframes starPop{from{transform:scale(0)}to{transform:scale(1)}}
+
+.popup-btn{
+  width:100%;padding:18px;
+  background:#0088C8;color:#fff;
+  border:2.5px solid #2868A8;
+  box-shadow:4px 4px 0 #2868A8;
+  border-radius:var(--r-sm);
+  font-family:'Archivo',sans-serif;
+  font-size:16px;font-weight:900;
+  cursor:pointer;letter-spacing:-.3px;
+  touch-action:manipulation;
+  transition:transform .1s,box-shadow .1s;
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+.popup-btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+
+.popup-btn-secondary{
+  width:100%;padding:14px;
+  background:#fff;color:var(--ink2);
+  border:2px solid var(--border2);
+  box-shadow:2px 2px 0 var(--border2);
+  border-radius:var(--r-sm);
+  font-family:'Archivo',sans-serif;
+  font-size:14px;font-weight:700;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+
+/* ── RESULTS ── */
+#results{
+  background:#fff;
+  padding:0 24px;
+  padding-top:env(safe-area-inset-top,16px);
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.results-inner{
+  flex:1;display:flex;flex-direction:column;
+  padding:32px 0 24px;
+  animation:slideInRight .4s ease;
+}
+.results-header{
+  text-align:center;margin-bottom:28px;
+}
+.results-trophy{font-size:80px;line-height:1;display:block;margin-bottom:16px}
+.results-title{
+  font-family:'Press Start 2P', monospace;
+  font-size:16px;color:var(--ink);
+  line-height:1.5;margin-bottom:8px;
+}
+.results-sub{font-size:14px;color:var(--muted);font-weight:600}
+
+.results-score-ring{
+  width:140px;height:140px;
+  border:4px solid var(--ink);
+  box-shadow:5px 5px 0 var(--ink);
+  border-radius:50%;
+  background:#f5f5fa;
+  margin:0 auto 28px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.results-pct{
+  font-family:'Press Start 2P', monospace;
+  font-size:28px;color:var(--ink);line-height:1;
+}
+.results-pct-lbl{font-size:11px;color:var(--muted);margin-top:4px;font-weight:600}
+
+.results-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:10px;margin-bottom:28px;
+}
+.rs-card{
+  border:2.5px solid var(--ink);
+  box-shadow:var(--px-shadow);
+  border-radius:var(--r-sm);
+  padding:14px 8px;text-align:center;
+  background:#fff;
+}
+.rs-val{
+  font-family:'Press Start 2P', monospace;
+  font-size:20px;display:block;margin-bottom:6px;
+}
+.rs-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;font-weight:700}
+.rs-ok .rs-val{color:var(--correct)}
+.rs-ko .rs-val{color:var(--wrong)}
+.rs-tot .rs-val{color:var(--muted)}
+
+/* Round badges */
+.round-badges{
+  display:flex;justify-content:center;gap:12px;
+  margin-bottom:28px;
+}
+.rb-item{text-align:center}
+.rb-medal{font-size:32px;display:block}
+.rb-lbl{font-family:'Press Start 2P', monospace;font-size:7px;color:var(--muted);margin-top:4px;display:block}
+
+.results-btns{display:flex;flex-direction:column;gap:10px}
+.btn-restart{
+  width:100%;padding:18px;
+  background:#0088C8;color:#fff;
+  border:2.5px solid var(--ink);
+  box-shadow:4px 4px 0 var(--ink);
+  border-radius:var(--r-sm);
+  font-family:'Archivo',sans-serif;
+  font-size:16px;font-weight:900;
+  cursor:pointer;text-transform:uppercase;letter-spacing:-.3px;
+  touch-action:manipulation;
+  transition:transform .1s,box-shadow .1s;
+}
+.btn-restart:active{transform:translate(2px,2px);box-shadow:2px 2px 0 #2868A8}
+.btn-review{
+  width:100%;padding:14px;
+  background:#fff;color:var(--ink2);
+  border:2px solid var(--border2);
+  box-shadow:2px 2px 0 var(--border2);
+  border-radius:var(--r-sm);
+  font-family:'Archivo',sans-serif;
+  font-size:14px;font-weight:700;cursor:pointer;
+  touch-action:manipulation;
+}
+
+/* ── REVIEW ── */
+#review{padding-top:env(safe-area-inset-top,0);overflow-y:auto;-webkit-overflow-scrolling:touch;height:100dvh;}
+.review-header{
+  position:sticky;top:0;z-index:10;
+  background:#fff;
+  border-bottom:2.5px solid var(--ink);
+  padding:14px 20px;
+  display:flex;align-items:center;gap:12px;
+}
+.back-btn{
+  width:40px;height:40px;
+  background:#fff;
+  border:2px solid var(--ink);
+  box-shadow:2px 2px 0 var(--ink);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:18px;
+  touch-action:manipulation;
+}
+.review-title{
+  font-family:'Press Start 2P', monospace;
+  font-size:11px;color:var(--ink);
+}
+.review-list{
+  padding:16px 20px;
+  display:flex;flex-direction:column;gap:12px;
+  padding-bottom:max(80px,env(safe-area-inset-bottom));
+}
+.review-item{
+  border:2px solid var(--border2);
+  box-shadow:2px 2px 0 var(--border2);
+  border-radius:var(--r-sm);
+  padding:14px;background:#fff;
+}
+.review-item.ri-ok{border-color:var(--correct);box-shadow:2px 2px 0 var(--correct)}
+.review-item.ri-ko{border-color:var(--wrong);box-shadow:2px 2px 0 var(--wrong)}
+.ri-num{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.ri-q{font-size:13px;font-weight:700;line-height:1.4;margin-bottom:8px;color:var(--ink)}
+.ri-exp{font-size:12px;color:var(--ink2);line-height:1.55;border-top:1px solid var(--border);padding-top:8px;margin-top:4px}
+
+/* Timeup overlay */
+.timeup-overlay{
+  display:none;position:fixed;inset:0;z-index:300;
+  background:rgba(26,26,46,.95);
+  align-items:center;justify-content:center;flex-direction:column;
+  gap:16px;padding:32px;text-align:center;
+}
+.timeup-overlay.show{display:flex;animation:fadeIn .4s ease}
+.timeup-icon{font-size:72px;margin-bottom:8px}
+.timeup-title{
+  font-family:'Press Start 2P', monospace;
+  font-size:18px;color:var(--px-yellow);line-height:1.5;
+}
+.timeup-msg{font-size:14px;color:rgba(255,255,255,.75);font-weight:600}
+.timeup-btn{
+  margin-top:8px;padding:16px 36px;
+  background:#0088C8;color:#fff;
+  border:2.5px solid #fff;
+  box-shadow:4px 4px 0 rgba(255,255,255,.3);
+  border-radius:var(--r-sm);
+  font-family:'Archivo',sans-serif;
+  font-size:16px;font-weight:900;
+  cursor:pointer;text-transform:uppercase;
+  touch-action:manipulation;
+}
+
+
+.btn-share{
+  width:100%;padding:18px;
+  background:linear-gradient(135deg,#0088C8,#2868A8);
+  color:#fff;
+  border:2.5px solid var(--ink);
+  box-shadow:3px 3px 0 var(--ink);
+  border-radius:var(--r-sm);
+  font-family:'Archivo',sans-serif;
+  font-size:15px;font-weight:900;
+  cursor:pointer;letter-spacing:-.3px;
+  touch-action:manipulation;
+  transition:transform .1s,box-shadow .1s;
+  text-transform:uppercase;
+}
+.btn-share:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:#f5f5fa}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+<div class="pixel-bg"></div>
+
+<!-- COMBO BADGE -->
+<div class="combo-badge" id="comboBadge">
+  <span class="combo-text" id="comboText">COMBO!</span>
+  <span class="combo-sub" id="comboSub">¡Racha increíble!</span>
+</div>
+
+<!-- TIMEUP -->
+<div class="timeup-overlay" id="timeupOverlay">
+  <div class="timeup-icon">⏱️</div>
+  <div class="timeup-title">¡TIEMPO!</div>
+  <div class="timeup-msg">Se acabaron los 26 minutos.<br>Veamos tu resultado.</div>
+  <button class="timeup-btn" onclick="finishByTimeout()">Ver resultado →</button>
+</div>
+
+<!-- ROUND POPUP -->
+<div class="popup-overlay" id="roundPopup">
+  <div class="popup-card">
+    <span class="popup-round-label" id="popupRoundLabel">RONDA 1 COMPLETA</span>
+    <span class="popup-medal" id="popupMedal">🥇</span>
+    <span class="popup-score" id="popupScore">8/10</span>
+    <span class="popup-score-lbl">respuestas correctas</span>
+    <div class="popup-stars" id="popupStars"></div>
+    <div class="popup-msg" id="popupMsg">¡Excelente! Seguís en carrera.</div>
+    <button class="popup-btn" id="popupContinueBtn" onclick="continueAfterRound()">Siguiente ronda →</button>
+    <button class="popup-btn-secondary" onclick="finishFromPopup()">Ver resultado final</button>
+  </div>
+</div>
+
+<!-- WELCOME -->
+<div id="welcome" class="screen active">
+  <div class="welcome-inner">
+    <div class="game-logo">
+      <img src="assets/sanfer-horizontal.png" alt="San Fernando Municipio" class="brand-logo brand-logo--welcome" style="max-height:88px;width:auto;margin-bottom:8px;display:block"/>
+      <span class="game-title-municipio" style="font-size:10px;color:#0088C8;font-family:'Press Start 2P',monospace;letter-spacing:1px">Test de Manejo</span>
+    </div>
+    <div class="pixel-car">🚗</div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-val">77</span>
+        <span class="stat-lbl">Preguntas</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val">4</span>
+        <span class="stat-lbl">Rondas</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-val">26'</span>
+        <span class="stat-lbl">Tiempo</span>
+      </div>
+    </div>
+    <div class="mode-chips">
+      <div class="chip"><span class="chip-dot" style="background:var(--px-green)"></span>Gratis</div>
+      <div class="chip"><span class="chip-dot" style="background:var(--brand-orange)"></span>Sin login</div>
+      <div class="chip"><span class="chip-dot" style="background:var(--px-cyan)"></span>100% Mobile</div>
+      <div class="chip"><span class="chip-dot" style="background:var(--brand-blue)"></span>Combos 🪪</div>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">▶ EMPEZAR</button>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div id="quiz" class="screen">
+  <div class="hud">
+    <div class="hud-round">
+      <span class="round-label" id="hudRoundLabel">RONDA 1</span>
+      <div class="round-pips" id="roundPips">
+        <div class="round-pip active"></div>
+        <div class="round-pip"></div>
+        <div class="round-pip"></div>
+        <div class="round-pip"></div>
+      </div>
+    </div>
+    <div class="hud-row">
+      <div class="hud-timers">
+        <div class="hud-timer">
+          <div class="hud-timer-ring">
+            <svg viewBox="0 0 28 28">
+              <circle class="ring-bg" cx="14" cy="14" r="11"/>
+              <circle class="ring-total" id="ringTotal" cx="14" cy="14" r="11" stroke-dasharray="69.1" stroke-dashoffset="0"/>
+            </svg>
+            <div class="ring-val" id="valTotal">26</div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <span style="font-family:'Press Start 2P',monospace;font-size:10px;color:var(--ink);line-height:1" id="valTotalFull">26:00</span>
+            <span style="font-size:9px;color:var(--muted);margin-top:2px;font-weight:600">total</span>
+          </div>
+        </div>
+        <div class="hud-timer">
+          <div class="hud-timer-ring">
+            <svg viewBox="0 0 28 28">
+              <circle class="ring-bg" cx="14" cy="14" r="11"/>
+              <circle class="ring-q" id="ringQ" cx="14" cy="14" r="11" stroke-dasharray="69.1" stroke-dashoffset="0"/>
+            </svg>
+            <div class="ring-val" id="valQ">59</div>
+          </div>
+          <div style="display:flex;flex-direction:column">
+            <span style="font-family:'Press Start 2P',monospace;font-size:10px;color:var(--ink);line-height:1" id="valQFull">59</span>
+            <span style="font-size:9px;color:var(--muted);margin-top:2px;font-weight:600">seg</span>
+          </div>
+        </div>
+      </div>
+      <div class="hud-score">
+        <img src="assets/sanfer-isotipo.png" alt="" class="brand-logo brand-logo--hud"/>
+        <span class="hud-score-val" id="scoreVal">0</span>
+      </div>
+    </div>
+    <div class="hud-prog">
+      <div class="hud-prog-fill" id="progFill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="quiz-body" id="quizBody">
+    <div class="q-meta">
+      <span class="q-num" id="qNum">P.01</span>
+      <span class="q-cat" id="catLabel"></span>
+    </div>
+    <div class="q-text" id="qText"></div>
+    <div class="q-img-wrap" id="qImgWrap"><img id="qImg" src="" alt=""/></div>
+    <div class="opts-list" id="optsList"></div>
+    <div class="feedback-box" id="feedbackBox">
+      <div class="fb-head" id="fbHead"></div>
+      <div id="fbBody"></div>
+    </div>
+  </div>
+
+  <div class="quiz-footer">
+    <button class="nav-prev" id="btnPrev" onclick="prevQ()" disabled>←</button>
+    <button class="nav-next" id="btnNext" onclick="nextQ()" disabled>SIGUIENTE →</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="results" class="screen">
+  <div class="results-inner">
+    <div class="results-header">
+      <span class="results-trophy" id="resTrophy">🏆</span>
+      <div class="results-title" id="resTitle">🚗</div>
+      <div class="results-sub" id="resSub">Resultado final</div>
+    </div>
+    <div class="results-score-ring">
+      <span class="results-pct" id="resPct">-</span>
+      <span class="results-pct-lbl">PUNTOS</span>
+    </div>
+    <div class="results-stats">
+      <div class="rs-card rs-ok"><span class="rs-val" id="resCor">0</span><span class="rs-lbl">Correctas</span></div>
+      <div class="rs-card rs-ko"><span class="rs-val" id="resWro">0</span><span class="rs-lbl">Errores</span></div>
+      <div class="rs-card rs-tot"><span class="rs-val">40</span><span class="rs-lbl">Total</span></div>
+    </div>
+    <div class="round-badges" id="roundBadges"></div>
+    <div class="results-btns">
+      <button class="btn-restart" onclick="startQuiz()">▶ JUGAR DE NUEVO</button>
+      <button class="btn-review" onclick="showReview()">Ver respuestas →</button>
+      <div id="shareSection" style="display:none;margin-top:4px">
+        <button class="btn-share" onclick="shareResult()">🪪 ¡Compartir mi resultado!</button>
+      </div>
+    <div style="text-align:center;margin-top:16px"><img src="assets/sanfer-horizontal.png" alt="San Fernando Municipio" class="brand-logo brand-logo--footer" style="max-height:44px;width:auto;opacity:.92"/></div>
+    </div>
+  </div>
+</div>
+
+<!-- REVIEW -->
+<div id="review" class="screen">
+  <div class="review-header">
+    <button class="back-btn" onclick="goScreen('results')">←</button>
+    <span class="review-title">REVISIÓN</span>
+  </div>
+  <div class="review-list" id="reviewList"></div>
+</div>
+
+<script>
+var BANK=[
+{cat:"Licencia de conducir",q:"Qué certifica la Licencia Nacional de Conducir?",opts:["Qué el titular pago el impuesto automotor","Qué esta habilitado para conducir determinado vehículo en la via publica","Qué el vehículo paso la VTV","Qué tiene seguro vigente"],a:1,exp:"La licencia certifica que la persona esta habilitada para conducir un vehículo especifico en la via publica, tras cumplir los requisitos correspondientes."},
+{cat:"Licencia de conducir",q:"Hasta cuantos dias despues de vencida se puede renovar una licencia sin tramitar una nueva?",opts:["30 dias","60 dias","90 dias","180 dias"],a:2,exp:"En la Provincia de Buenos Aires la licencia puede renovarse hasta noventa días después de vencida. Pasado ese plazo hay que tramitar una nueva desde cero."},
+{cat:"Licencia de conducir",q:"Qué clase de licencia habilita para automoviles y camiónetas de uso privado hasta 3.500 kg?",opts:["Clase A","Clase B","Clase C","Clase D"],a:1,exp:"La clase B habilita para automoviles, camiónetas y utilitarios hasta 3.500 kg de uso privado."},
+{cat:"Licencia de conducir",q:"Cuál es la edad mínima para obtener la licencia clase B?",opts:["16 años","17 años","18 años","21 años"],a:1,exp:"La licencia clase B (automóviles y camionetas hasta 3.500 kg) requiere tener al menos 17 años cumplidos."},
+{cat:"Licencia de conducir",q:"Cuantos examenes deben aprobar los aspirantes a la licencia en San Fernando?",opts:["1 (solo teórico)","2 (médico y teórico)","3 (médico, teórico y práctico)","4 examenes"],a:2,exp:"Se requieren 3 examenes: psicofisico/médico, teórico y práctico de manejo."},
+{cat:"Licencia de conducir",q:"Qué edad mínima se requiere para las licencias profesionales Clase D (transporte de pasajeros)?",opts:["17 años","18 años","19 años","21 años"],a:3,exp:"La licencia clase D (transporte de pasajeros) requiere al menos 21 años cumplidos (Art. 16 Ley 24.449 y Disposición 20/19 Pcia. Buenos Aires). Previamente se debe poseer la clase B con al menos 1 año de antigüedad."},
+{cat:"Licencia de conducir",q:"La clase D4 habilita para:",opts:["Camiónes con acoplado","Vehículos de urgencia y emergencia","Transporte de mas de 20 pasajeros","Maquinaria agricola"],a:1,exp:"La clase D4 habilita para vehículos de urgencia y emergencia, siempre acompañada de la subclase correspondiente al tipo de vehículo."},
+{cat:"Licencia de conducir",q:"Qué edad mínima establece la Ley 24.449 para conducir ciclomotores (hasta 50cc)?",opts:["14 años","15 años","16 años","18 años"],a:2,exp:"La Ley 24.449 y su decreto reglamentario establecen que la edad mínima para conducir ciclomotores de hasta 50cc es de 16 años. Entre los 16 y 17 años, con restricciones de circulación en autopistas."},
+{cat:"Licencia de conducir",q:"Qué sucede si la licencia esta vencida al momento de un control?",opts:["Se puede seguir manejando 30 dias mas","El agente puede realizar una retencion preventiva","Solo se labra un acta sin consecuencias","Se otorga un plazo de 15 dias para renovar"],a:1,exp:"Conducir con la licencia vencida es una falta grave que puede implicar la retencion preventiva del documento por el agente de transito."},
+{cat:"Documentacion",q:"Cuál es la documentacion OBLIGATORIA para circular con un vehículo?",opts:["Solo licencia y DNI","Licencia, DNI, cedula verde, seguro, patentes y VTV","Solo licencia habilitante y seguro","Licencia, patente e impuesto automotor"],a:1,exp:"Es obligatorio portar: licencia habilitante, DNI, cedula verde, seguro de responsabilidad civil vigente, chapas de dominio originales, VTV e impuesto automotor."},
+{cat:"Documentacion",q:"Qué acredita la VTV?",opts:["Qué el vehículo pago el patente","Qué el conductor aprobo el examen práctico","Qué los elementos de seguridad del vehículo estan en optimas condiciones","Qué el seguro esta vigente"],a:2,exp:"La VTV (Verificacion Tecnica Vehicular) certifica que todos los elementos de seguridad del vehículo funcionan correctamente."},
+{cat:"Documentacion",q:"Es valido el comprobante de pago del seguro como constancia de vigencia?",opts:["Si, siempre es valido","Solo si fue pagado el mes anterior","No, el comprobante de pago no es constancia de vigencia del seguro","Solo en zonas urbanas"],a:2,exp:"El comprobante de pago no garantiza la vigencia del seguro. Se debe portar el comprobante de cobertura vigente emitido por la aseguradora."},
+{cat:"Normas de conducción",q:"Cuál es el orden correcto de prioridad normativa al circular?",opts:["Normas legales, semáforos, autoridad","Autoridad, señales transitorias, semáforos, señalización vertical, normas legales","Semáforos, autoridad, normas, señales","Señales verticales, autoridad, semáforos"],a:1,exp:"El orden es: 1 Autoridad de control, 2 Señales transitorias, 3 Semáforos, 4 Señalización vertical y demarcación, 5 Normas legales."},
+{cat:"Normas de conducción",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p15_sign_197.png",q:"Qué indica la línea continua en la calzada?",opts:["Puede traspasarse con precaución","Solo de noche puede cruzarse","No debe traspasarse ni circular sobre ella","Zona de estacionamiento permitido"],a:2,exp:"La línea continua, sea blanca o amarilla, prohibe traspasarla o circular sobre ella."},
+{cat:"Normas de conducción",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p15_sign_192.png",q:"Qué indica la línea discontinua?",opts:["Nunca puede traspasarse","Indica posibilidad de traspasarse","Solo puede cruzarse de noche","Solo en zonas urbanas"],a:1,exp:"La línea discontinua indica que puede traspasarse cuando las condiciones lo permiten, a diferencia de la línea continua."},
+{cat:"Normas de conducción",q:"Cuál es la velocidad máxima en calles urbanas?",opts:["30 km/h","40 km/h","60 km/h","80 km/h"],a:1,exp:"Art. 51 Ley 24.449: en zonas urbanas la velocidad máxima es 40 km/h en calles y 60 km/h en avenidas, salvo señalización en contrario. La presencia de semáforos no modifica estos límites salvo señal expresa. Senalización diferente."},
+{cat:"Normas de conducción",q:"Qué indica el color naranja en las señales transitorias?",opts:["Peligro extremo permanente","Obras o trabajos en la via y sus proximidades","Zona escolar","Prohibicion definitiva"],a:1,exp:"El naranja identifica las señales transitorias por obras. Tienen prioridad sobre la señalización habitual de la via."},
+{cat:"Normas de conducción",q:"Quienes tienen prioridad de paso en la via publica?",opts:["Los vehículos mas grandes","Peatónes y ciclistas sobre los vehículos motorizados","Los vehículos que vienen por la izquierda","El vehículo con mas pasajeros"],a:1,exp:"Los usuarios vulnerables (peatónes, ciclistas) tienen prioridad. En intersecciónes sin semáforo, tiene prioridad quien viene por la derecha."},
+{cat:"Normas de conducción",q:"Puede el agente de transito ordenar el avance con semáforo en rojo?",opts:["Nunca, el semáforo siempre tiene prioridad","Si, sus ordenes prevalecen sobre semáforos y señales","Solo en horario nocturno","Solo en autopistas"],a:1,exp:"Los agentes de transito tienen prioridad sobre cualquier señal o semáforo. Sus indicaciónes siempre deben obedecerse."},
+{cat:"Normas de conducción",q:"Qué distancia lateral mínima debe guardar un vehículo al adelantar a un ciclista?",opts:["50 cm","1 metro","1,5 metros","2 metros"],a:2,exp:"La normativa establece una distancia mínima de 1,5 metros de separación lateral al adelantar a ciclistas para garantizar su seguridad."},
+{cat:"Normas de conducción",q:"Qué tipo de señales tienen prioridad sobre la señalización habitual de la via?",opts:["Las señales informativas verdes","Las señales transitorias naranjas por obras","Las señales de velocidad máxima","Las señales de prohibicion permanentes"],a:1,exp:"Las señales transitorias naranjas (obras, trabajos) tienen prioridad sobre cualquier otra señalización habitual instalada en la via."},
+{cat:"Normas de conducción",q:"Como debe circular un vehículo por una rotonda?",opts:["En sentido horario por el carril exterior","En sentido antihorario, cediendo el paso a quien ya circula dentro","En el sentido que indique el semáforo","De frente, sin reducir velocidad"],a:1,exp:"En Argentina las rotondas se circulan en sentido antihorario. El vehículo que intenta ingresar debe ceder el paso a los que ya circulan dentro de la rotonda."},
+{cat:"Alcohol y drogas",q:"Cuál es la tasa legal de alcohol en sangre para conducir en Buenos Aires?",opts:["0,5 g/l","0,2 g/l","0,0 g/l (Alcohol Cero)","1,0 g/l"],a:2,exp:"La Ley 27.714 (modificatoria del Art. 48 Ley 24.449, vigente desde mayo 2023) establece Alcohol Cero a nivel nacional: no se puede conducir con ninguna concentracion de alcohol en sangre en la provincia de Buenos Aires."},
+{cat:"Alcohol y drogas",q:"Qué inhabilitacion recibe quien conduce con hasta 499 mg de alcohol por litro de sangre?",opts:["Solo multa economica","3 meses de inhabilitacion","6 meses de inhabilitacion","18 meses de inhabilitacion"],a:1,exp:"Según la Ley 13.927 de la Provincia de Buenos Aires, conducir con hasta 499 mg de alcohol por litro implica 3 meses de inhabilitación. La Ley nacional 27.714 (2023) establece Alcohol Cero, por lo que cualquier detección positiva constituye infracción. Conducir con hasta 499 mg de alcohol por litro de sangre implica 3 meses de inhabilitacion para manejar segun la Ley de Alcohol Cero."},
+{cat:"Alcohol y drogas",q:"Qué sucede si un conductor se niega al control de alcoholemia?",opts:["Se lo deja ir sin consecuencias","Se presume positivo y se aplica el procedimiento correspondiente","Solo recibe multa menor","Se lo cita a declarar despues"],a:1,exp:"Negarse al control genera una presuncion en contra del conductor. La autoridad aplica el mismo procedimiento que si hubiera dado positivo."},
+{cat:"Alcohol y drogas",q:"Ademas de disminuir reflejos, el alcohol puede:",opts:["Mejorar momentaneamente la concentracion","Generar falsa sensacion de seguridad y conductas temerarias","Reducir la velocidad instintivamente","Aumentar la vision periferica"],a:1,exp:"El alcohol provoca falsa sensacion de seguridad y perdida de inhibiciones, lo que lleva a conductas riesgosas como exceso de velocidad o no usar cinturon."},
+{cat:"Alcohol y drogas",q:"Cuales son los factores que disminuyen la capacidad de conducción?",opts:["Solo el alcohol y las drogas","Alcohol/drogas, sueño y fatiga, estres y distracciones","El clima, el tráfico y el cansancio","Solo distracciones por el celular"],a:1,exp:"Los cuatro factores que reducen la capacidad de conducir son: alcohol y drogas, sueño y fatiga, estres, y distracciones."},
+{cat:"Alcohol y drogas",q:"Segun la ANSV, el alcohol esta presente en que porcion de los siniestros viales con fallecidos?",opts:["1 de cada 10","1 de cada 4","1 de cada 2","9 de cada 10"],a:1,exp:"Segun la ANSV (2023), el alcohol esta presente en al menos 1 de cada 4 siniestros viales con fallecidos en Argentina."},
+{cat:"Alcohol y drogas",q:"Cuanto tiempo puede llevar al organismo metabolizar el alcohol ingerido?",opts:["Minutos","Exactamente 1 hora por cada copa","Varias horas, variando segun masa corporal, alimentacion y funcion hepatica","Siempre menos de 2 horas"],a:2,exp:"El tiempo de metabolizacion del alcohol varia segun cada persona: masa corporal, ingesta de alimentos y funcion hepatica son factores determinantes. Puede llevar varias horas."},
+{cat:"Elementos de seguridad",q:"Cuales son las tres funciones principales del casco para motociclistas?",opts:["Proteger el cuello, reducir ruido y mejorar vision","Reducir desaceleracion del craneo, dispersar el impacto y actuar como barrera mecanica","Proteger cara, cuello y nuca unicamente","Mejorar aerodinamica, proteger cara y reducir fatiga"],a:1,exp:"El casco: 1) Reduce la desaceleracion del craneo absorbiendo el impacto, 2) Dispersa la fuerza sobre una superficie mayor, 3) Actua como barrera mecanica entre craneo y objeto."},
+{cat:"Elementos de seguridad",q:"Qué son los puntos ciegos en un vehículo?",opts:["Zonas sin buena iluminacion nocturna","Zonas que el conductor no puede ver mirando al frente ni usando los espejos","Angulos muertos del semáforo","Areas sin señal de radio"],a:1,exp:"Los puntos ciegos son las zonas de la via que el conductor no puede ver al mirar al frente ni al usar los espejos retrovisores o laterales."},
+{cat:"Elementos de seguridad",q:"Como deben viajar los menores de 4 años segun las normas bonaerenses?",opts:["En el asiento delantero con cinturon","Con el Sistema de Retencion Infantil (SRI) en el asiento trasero","En brazos de un adulto","Con cinturon normal en el asiento trasero"],a:1,exp:"Los menores de 10 años deben ir en el asiento trasero; los menores de 4 años, ademas, con el SRI adecuado a su talla y peso."},
+{cat:"Elementos de seguridad",q:"Cuál es el lugar mas seguro para colocar el SRI?",opts:["Asiento delantero derecho","Plaza trasera derecha","Plaza trasera central","Plaza trasera izquierda"],a:2,exp:"El lugar mas seguro para un SRI es la plaza trasera central, seguida por la trasera derecha y luego la izquierda."},
+{cat:"Elementos de seguridad",q:"Hasta que edad y peso mínimo debe viajar un bebe mirando hacia atras en el SRI?",opts:["1 año o 8 kg","2 años y 10 kg como mínimo","3 años o 15 kg","6 meses o 5 kg"],a:1,exp:"El bebe debe viajar mirando hacia atras hasta los 2 años y 10 kg como mínimo. Esa orientación protege mejor la cabeza, el cuello y la columna."},
+{cat:"Elementos de seguridad",q:"A que grupo SRI pertenece el huevito?",opts:["Grupo 1 (9-18 kg)","Grupos 0 y 0+ (hasta 10-13 kg)","Grupo 2 (15-27 kg)","Grupo 3 (22-36 kg)"],a:1,exp:"El huevito corresponde al Grupo 0 (hasta 10 kg) y 0+ (hasta 13 kg), y siempre se instala mirando hacia atras."},
+{cat:"Elementos de seguridad",q:"Pueden instalarse SRI en asientos con airbag activo adelante?",opts:["Si, siempre que sea un modelo homologado","Si, solo en modo contramarcha","No, jamas deben instalarse en asientos con airbag activo","Solo si el bebe pesa mas de 13 kg"],a:2,exp:"Los SRI jamas deben instalarse en asientos que dispongan de airbag activos, ya que la activacion del airbag puede causar lesiones graves al bebe."},
+{cat:"Motovehículos",q:"Qué clase de licencia se necesita para motos de mas de 300cc?",opts:["A 1.2","A 1.3","A 1.4","B 1"],a:2,exp:"La clase A1.4 habilita para motos de mas de 300 cc o mas de 20 kw. Requiere 2 años de antiguedad en A1.3 o 1 año si se tiene mas de 21."},
+{cat:"Motovehículos",q:"Como debe frenar de forma segura un motociclista?",opts:["Solo con el freno trasero","Desacelerando con el motor y acciónando ambos frenos progresivamente","Solo con el freno delantero","Frenando bruscamente con el freno delantero primero"],a:1,exp:"La tecnica correcta es desacelerar con el motor (sin soltar el embrague de golpe) y luego acciónar ambos frenos progresivamente. Usar un solo freno brusco puede provocar caida."},
+{cat:"Motovehículos",q:"Cuál es la postura correcta de las manos en el volante?",opts:["180 grados con codos rectos","La posición correcta de las manos en el volante es a las 9 y 5 o 10 y 10 (como las agujas del reloj)","Solo apoyadas ligeramente","En la parte interior del volante"],a:1,exp:"La posición correcta de las manos en el volante es a las 9 y 15 o 10 y 10 (imaginando un reloj), con los brazos ligeramente flexionados y sin bloquear los codos."},
+{cat:"Motovehículos",q:"Qué es el efecto Venturi para motociclistas?",opts:["La tendencia de la moto a irse hacia adelante al frenar","La succion que genera un vehículo de gran porte al circular muy cerca, causando perdida de estabilidad","La perdida de tracción trasera en curvas","El efecto del viento en la visibilidad del visor"],a:1,exp:"El efecto Venturi ocurre cuando un motociclista circula cerca de un camión o micro: la diferencia de presion genera una succion que puede provocar caida o perdida de control."},
+{cat:"Motovehículos",q:"Los ciclomotores (hasta 50cc) pueden circular por autopistas?",opts:["Si, por el carril derecho","Si, si llevan casco y chaleco","No, los ciclomotores no pueden circular por autopistas","Solo de noche cuando hay menos tráfico"],a:2,exp:"Los ciclomotores (hasta 50 cc, subclase A1.1) tienen expresamente prohibida la circulación por autopistas."},
+{cat:"Transporte profesional",q:"Qué es el fenomeno off-tracking en vehículos de gran porte?",opts:["La desviacion del volante en pendiente","Las ruedas traseras siguen una trayectoria mas cerrada que las delanteras al girar","La perdida de frenos en caminos mojados","El deslizamiento del acoplado en curvas"],a:1,exp:"En el off-tracking, al girar un vehículo grande, las ruedas traseras siguen una trayectoria mas estrecha que las delanteras, desplazando el extremo trasero hacia el lado opuesto de la curva."},
+{cat:"Transporte profesional",q:"Como debe realizar las paradas un conductor de colectivo urbano?",opts:["Donde sea mas conveniente para el pasajero","En paradas habilitadas, paralelo a la vereda y junto a ella","En doble fila si la parada esta ocupada","En la bocacalle para mayor visibilidad"],a:1,exp:"Las paradas deben realizarse en paradas habilitadas, en forma paralela a la vereda para evitar que motos o bicicletas sobrepasen por la derecha al subir y bajar pasajeros."},
+{cat:"Transporte profesional",q:"Cuando puede un colectivo detenerse fuera de las paradas habilitadas?",opts:["Siempre que el pasajero lo solicite","Con discapacitados, dias de lluvia u horario nocturno (22hs a 6hs)","Nunca bajo ninguna circunstancia","Cuando la parada siguiente esta a mas de 200 metros"],a:1,exp:"Solo puede detenerse fuera de paradas para pasajeros con discapacidad, en dias de lluvia, o en horario nocturno entre las 22 y las 6 horas."},
+{cat:"Transporte profesional",q:"Como se reduce el riesgo de los puntos ciegos en vehículos de gran porte?",opts:["Aumentar la velocidad para mayor control","Ajustar espejos antes de iniciar y mirar al menos dos veces antes de maniobrar","Usar solo el espejo retrovisor interno","Evitar circular en zonas urbanas"],a:1,exp:"Se debe ajustar correctamente los espejos antes de partir, y antes de toda maniobra: reducir velocidad, activar la luz de giro y verificar por los espejos al menos dos veces."},
+{cat:"Transporte profesional",q:"Se considera conductor profesional a quien conduce con licencia de categoria:",opts:["B solamente","A y B","C, D y E","Cualquier categoria, si lo hace como trabajo"],a:2,exp:"Se considera conductor profesional a quienes poseen licencias C, D o E y hacen de la conducción su actividad laboral: taxis, colectivos, camiónes, etc."},
+{cat:"Responsabilidad vial",q:"Cuál es el principal factor de riesgo en los incidentes de transito?",opts:["Factor ambiental","Factor vehicular","Factor humano","Factor climatico"],a:2,exp:"El factor humano (decisiones, omisiones, actitudes y conductas) es el principal factor de riesgo en los incidentes viales."},
+{cat:"Responsabilidad vial",q:"Qué diferencia un incidente de un accidente de transito?",opts:["La gravedad de las lesiones","El incidente es evitable e interviene el factor humano; el accidente es fortuito","El tipo de vehículo involucrado","La hora del dia en que ocurre"],a:1,exp:"Un accidente es fortuito e impredecible. Un incidente de transito es evitable y siempre interviene el factor humano en su produccion."},
+{cat:"Responsabilidad vial",q:"Cuantos fallecidos registro Argentina en siniestros viales en 2023?",opts:["1.190 fallecidos","4.369 fallecidos en 3.642 incidentes","8.000 fallecidos","2.100 fallecidos"],a:1,exp:"Segun la ANSV, en 2023 se registraron 3.642 incidentes viales con 4.369 fallecidos en Argentina."},
+{cat:"Responsabilidad vial",q:"Cuantas vidas cobra el transito anualmente en el mundo segun la OMS?",opts:["500.000","1,19 millones","3 millones","800.000"],a:1,exp:"La OMS estima que los incidentes de transito causan apróximadamente 1,19 millones de muertes al año en todo el mundo."},
+{cat:"Responsabilidad vial",q:"Cuales son los tres factores que intervienen en un incidente de transito?",opts:["Velocidad, visibilidad y estado del vehículo","Factor humano, vehicular y ambiental","Infraestructura, clima y habilidad del conductor","Tiempo de reacción, distancia y velocidad"],a:1,exp:"Los tres factores son: Humano (decisiones y conductas), Vehicular (estado mecanico) y Ambiental (infraestructura, clima, entorno)."},
+{cat:"Responsabilidad vial",q:"A quien le corresponde respetar las normas de transito?",opts:["Solo a los conductores de vehículos motorizados","Solo a los conductores profesionales","A todos los usuarios de la via: conductores, peatónes y ciclistas","Solo a quien ha cometido infracciónes previas"],a:2,exp:"Las normas de transito aplican a todos los usuarios de la via publica: conductores, ciclistas, peatónes y cualquier persona que interactue en el espacio vial."},
+{cat:"Responsabilidad vial",q:"Los siniestros viales son la principal causa de muerte en que franja etaria?",opts:["Niños menores de 5 años","Jovenes y adultos de 5 a 29 años","Adultos mayores de 65 años","Adultos de 40 a 60 años"],a:1,exp:"Segun la OMS, los incidentes de transito son la principal causa de muerte entre personas de 5 a 29 años a nivel mundial."},
+{cat:"Semáforos",q:"Qué indica el semáforo en luz amarilla?",opts:["Avanzar con precaución","Detenerse si se estima que no se podra cruzar antes de que cambie a roja","Acelerar para cruzar antes de que se ponga roja","Continuar siempre, la amarilla es solo aviso"],a:1,exp:"La luz amarilla indica detenerse si el conductor estima que no podra terminar de cruzar antes de que cambie a roja. No es una autorizacion para acelerar."},
+{cat:"Semáforos",q:"Qué indica el semáforo intermitente amarillo?",opts:["Detenerse completamente como si fuera roja","Avanzar sin precaution porque la via esta despejada","Presencia de cruce riesgoso: reducir velocidad y cruzar con precaución","Qué el semáforo esta averiado"],a:2,exp:"El semáforo intermitente amarillo advierte sobre un cruce riesgoso. Se debe aminorar la marcha y efectuar el cruce con máxima precaución."},
+{cat:"Semáforos",q:"Qué indica el semáforo intermitente rojo?",opts:["Avanzar como si fuera verde","Cruce peligroso: detenerse y reanudar solo cuando no exista riesgo","Dar prioridad a peatónes y continuar","Ignorarlo si no hay otros vehículos"],a:1,exp:"El semáforo intermitente rojo indica la presencia de un cruce peligroso. Se debe detener la marcha y solo reanudarla cuando se observe que no existe riesgo alguno."},
+{cat:"Semáforos",q:"Ante una luz roja del semáforo, donde debe detenerse el vehículo?",opts:["En la mitad de la bocacalle","Antes de la línea marcada a tal efecto o de la senda peatónal","A 5 metros de la esquina","Donde lo indique el inspector de transito"],a:1,exp:"Ante la luz roja, el vehículo debe detenerse antes de la línea de detenccion marcada en la calzada o, en su defecto, antes de la senda peatónal."},
+{cat:"Distancias de seguridad",q:"Cuál es la distancia mínima lateral que debe guardar un vehículo al adelantar a un ciclista?",opts:["50 centimetros","1 metro","1,5 metros","2 metros"],a:2,exp:"La normativa establece una distancia mínima de 1,5 metros de separación lateral al sobrepasar a ciclistas, para garantizar su seguridad ante posibles maniobras evasivas."},
+{cat:"Distancias de seguridad",q:"La distancia de seguridad entre vehículos en movimiento depende principalmente de:",opts:["El color del vehículo de adelante","La velocidad de circulación y el tiempo de reacción del conductor","El tipo de combustible del vehículo","La cantidad de pasajeros que transporta"],a:1,exp:"La distancia de seguridad debe permitir frenar sin colisionar si el vehículo de adelante detiene bruscamente. A mayor velocidad, mayor distancia necesaria. Se aplica la regla de los 2 segundos como mínimo."},
+{cat:"Distancias de seguridad",q:"Cuál es la regla práctica para calcular la distancia de seguridad mínima en condiciones normales?",opts:["Mantener 10 metros por cada 10 km/h de velocidad","Contar 2 segundos desde que el vehículo de adelante pasa un punto fijo hasta que lo pasa el propio vehículo","Mantener siempre 50 metros fijos independientemente de la velocidad","La mitad de los metros que indica el velocimetro en km/h"],a:1,exp:"La regla de los 2 segundos consiste en elegir un punto fijo y contar 2 segundos desde que el vehículo adelante lo pasa. En condiciones adversas (lluvia, niebla, noche) se debe duplicar a 4 segundos."},
+{cat:"Distancias de seguridad",q:"En caso de lluvia o piso mojado, la distancia de seguridad respecto del vehículo de adelante debe:",opts:["Mantenerse igual que en seco","Reducirse porque los frenos modernos compensan","Duplicarse o triplicarse respecto de la distancia en seco","Depende solo del tipo de neumaticos"],a:2,exp:"Con piso mojado la distancia de frenado aumenta considerablemente. Se recomienda duplicar o triplicar la distancia de seguridad habitual para compensar la reducción de adherencia."},
+{cat:"Distancias de seguridad",q:"Qué distancia mínima debe respetarse al estacionar cerca de una boca de incendio?",opts:["3 metros","5 metros","6 metros","10 metros"],a:0,exp:"Esta prohibido estacionar a menos de 3 metros de una boca de incendio para garantizar el acceso rápido de los bomberos en caso de emergencia."},
+{cat:"Estacionamiento",q:"A cuantos metros de una esquina o bocacalle esta prohibido estacionar?",opts:["3 metros","5 metros","10 metros","La distancia que indique la señal"],a:1,exp:"Esta prohibido estacionar a menos de 5 metros de la bocacalle (línea imaginaria de prolongacion de la ochava), para garantizar la visibilidad y el acceso a la intersección."},
+{cat:"Estacionamiento",q:"En que lado de la calzada debe estacionarse el vehículo segun la normativa general?",opts:["A la derecha en el sentido de la marcha, paralelo a la vereda","A la izquierda para facilitar el descenso","En el centro si hay espacio disponible","Del lado que indique el conductor de acuerdo a su conveniencia"],a:0,exp:"Los vehículos deben estacionarse a la derecha en el sentido de la marcha, en forma paralela a la vereda y junto a ella, salvo en lugares con señalización especifica que indique otra disposicion."},
+{cat:"Estacionamiento",q:"Cuando esta permitido estacionar en doble fila?",opts:["Cuando solo se tardara menos de 5 minutos","Cuando hay poca circulación de vehículos","Nunca esta permitido, es una infracción grave","Solo en zonas comerciales durante el dia"],a:2,exp:"El estacionamiento en doble fila esta terminantemente prohibido. Obstaculiza la circulación, bloquea vehículos estacionados correctamente y puede generar situaciónes de peligro."},
+{cat:"Estacionamiento",q:"Qué deben respetar los conductores al estacionar sobre una pendiente pronunciada?",opts:["Dejar el motor en marcha para mayor seguridad","Girar las ruedas hacia la vereda o el cordon y usar el freno de mano","Estacionar en punto muerto sin freno de mano","No hay obligación especial en pendientes"],a:1,exp:"En pendientes se debe girar las ruedas hacia la vereda (en bajada) o hacia la calzada (en subida) como medida de seguridad ante una posible falla del freno de mano, y siempre acciónar el freno de estacionamiento."},
+{cat:"Velocidades especificas",q:"Cuál es la velocidad máxima permitida en zonas escolares o cuando hay niños cruzando?",opts:["20 km/h","30 km/h","40 km/h","50 km/h"],a:0,exp:"Art. 51 inc. 3 Ley 24.449: en proximidad de establecimientos escolares y cuando hay niños presentes, la velocidad precautoria máxima es de 20 km/h durante su funcionamientod máxima es de 20 km/h, o la que indique la señalización, lo que sea menor."},
+{cat:"Velocidades especificas",q:"Cuál es la velocidad máxima en rutas nacionales de doble mano sin banquina pavimentada?",opts:["80 km/h","100 km/h","110 km/h","120 km/h"],a:1,exp:"Art. 51 Ley 24.449: en rutas de doble mano la velocidad máxima general es 110 km/h para automóviles. Sin embargo, sin banquina pavimentada el límite es 100 km/h. La respuesta correcta aplica a la situación más restrictiva y frecuente. Pero puede reducirse segun las condiciones de la via y la señalización presente."},
+{cat:"Velocidades especificas",q:"En autopistas y autovias, cual es la velocidad máxima permitida para automoviles?",opts:["100 km/h","110 km/h","120 km/h","130 km/h"],a:3,exp:"Art. 51 inc. d Ley 24.449: en autopistas los automóviles pueden circular hasta 130 km/h. Esta es la velocidad máxima legal; si hay señalización específica menor, ésta prevalece. Salvo señalización que indique un limite menor. Para camiónes y vehículos de transporte el limite es inferior."},
+{cat:"Velocidades especificas",q:"Cuál es el limite de velocidad en zonas semiurbanas (accesos a ciudades con edificacion de un solo lado)?",opts:["40 km/h","60 km/h","80 km/h","100 km/h"],a:2,exp:"En zonas semiurbanas, es decir los accesos a localidades con edificacion de un solo lado de la calzada, la velocidad máxima es de 80 km/h salvo señalización diferente."},
+{cat:"Velocidades especificas",q:"Ante condiciones meteorologicas adversas como lluvia intensa, niebla o granizo, el conductor debe:",opts:["Mantener la velocidad reglamentaria porque los limites ya contemplan estas situaciónes","Reducir la velocidad por debajo del limite legal si las condiciones lo requieren","Aumentar la velocidad para salir rápido de la zona de peligro","Encender las luces de emergencia y continuar a la misma velocidad"],a:1,exp:"El conductor debe adaptar la velocidad a las condiciones reales de la via. Puede y debe circular por debajo del limite legal cuando las condiciones de visibilidad, adherencia o tráfico asi lo exigen."},
+{cat:"Ciclistas y peatónes",q:"En una intersección sin semáforo ni señalización, quien tiene prioridad de paso?",opts:["El vehículo mas grande","El vehículo que lleva mas velocidad","El peatón y el ciclista sobre los vehículos motorizados","El vehículo que viene desde la derecha"],a:2,exp:"Los peatónes y ciclistas son usuarios vulnerables y tienen prioridad de paso sobre los vehículos motorizados en intersecciónes, cruces peatónales y situaciónes donde deban compartir el espacio vial."},
+{cat:"Ciclistas y peatónes",q:"Donde deben circular las bicicletas cuando existe carril bici habilitado?",opts:["Pueden elegir entre el carril bici o la calzada segun prefieran","Deben utilizar obligatoriamente el carril bici cuando este este habilitado","Solo si llevan casco deben usar el carril bici","En la vereda si es mas seguro"],a:1,exp:"Cuando existe carril bici habilitado, los ciclistas deben utilizarlo obligatoriamente. Solo pueden circular por la calzada cuando el carril bici no esta disponible o en situaciónes especiales."},
+{cat:"Ciclistas y peatónes",q:"El conductor debe ceder el paso a los peatónes en la senda peatónal:",opts:["Solo si el semáforo peatónal esta en verde","Siempre, independientemente del color del semáforo vehicular","Solo cuando el peatón ya empezo a cruzar","Solo en zonas escolares"],a:1,exp:"El conductor debe ceder el paso a los peatónes en la senda peatónal siempre, incluso con semáforo vehicular en verde si el peatón ya esta cruzando o esta por cruzar. El peatón tiene prioridad en la senda."},
+{cat:"Ciclistas y peatónes",q:"Qué obligación tiene el conductor al apróximarse a una senda peatónal donde hay un peatón esperando cruzar?",opts:["Continuar si el semáforo vehicular esta en verde","Tocar bocina para avisar al peatón que va a pasar","Reducir la velocidad y ceder el paso al peatón","Acelerar para cruzar antes que el peatón llegue a la calzada"],a:2,exp:"Al apróximarse a una senda peatónal con un peatón esperando, el conductor debe reducir la velocidad y ceder el paso. El peatón tiene prioridad sobre los vehículos en la senda peatónal."},
+{cat:"Ciclistas y peatónes",q:"Los ciclistas menores de que edad deben circular obligatoriamente con casco?",opts:["Menores de 12 años","Menores de 16 años","Menores de 18 años","El casco es obligatorio para todas las edades en bicicleta"],a:3,exp:"En la Provincia de Buenos Aires y el Municipio de San Fernando, el uso de casco es obligatorio para ciclistas de todas las edades. La Ley 24.449 (Art. 40) lo exige expresamente para motociclistas; para ciclistas rige la normativa provincial y municipal. Segun la Ley Nacional de Transito. Ademas deben llevar luces y elementos reflectivos para circular de noche."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_122.png",q:"¿Qué anticipa esta señal?",opts:["Proximidad de una señal de Pare a 200 metros","Inicio de control policial","Cruce ferroviario próximo","Prohibición de avanzar"],a:0,exp:"Esta señal preventiva indica que a 200 metros hay una señal de PARE. El conductor debe prepararse para detenerse completamente antes del cruce."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_121.png",q:"¿Qué anticipa esta señal?",opts:["Proximidad de una señal de Pare","Proximidad de una señal de Ceda el Paso a 200 metros","Ingreso a autopista","Fin de restricción"],a:1,exp:"Esta señal preventiva advierte que a 200 metros habrá una señal de Ceda el Paso. Reducir velocidad y prepararse para ceder."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_125.png",q:"¿Qué advierte esta señal?",opts:["Cruce ferroviario","Proximidad de semáforo","Zona escolar","Control policial"],a:1,exp:"Esta señal advierte la proximidad de un semáforo. Prepararse para detenerse si está en rojo al llegar."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p10_sign_124.png",q:"¿Qué indica esta señal?",opts:["Curva pronunciada hacia la izquierda con panel direcciónal","Giro obligatorio a la izquierda","Desvío por obras","Cambio de sentido de circulación"],a:0,exp:"Esta señal indica la presencia de una curva pronunciada hacia la izquierda, acompañada de un panel direcciónal de advertencia."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p11_sign_129.png",q:"¿Qué tipo de vía identifica esta señal?",opts:["Ruta nacional","Autopista","Camino rural","Avenida"],a:1,exp:"Esta señal informativa identifica una autopista. En autopistas rigen normas especiales de velocidad y circulación."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p11_sign_134.png",q:"¿Qué información brinda esta señal?",opts:["Límite de velocidad","Distancia y destino","Zona turística","Ruta alternativa"],a:1,exp:"Esta señal informativa de orientación indica la distancia y el destino. Es fundamental para la orientación del conductor en ruta."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_143.png",q:"¿Qué indica esta señal?",opts:["Camino o calle sin salida","Esquema de recorrido","Desvío por cambio de sentido de circulación","Dirección obligatoria hacia adelante"],a:2,exp:"Esta señal indica un desvío generado por un cambio de sentido de circulación. El conductor debe seguir el recorrido alternativo indicado."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_144.png",q:"¿Qué representa esta señal?",opts:["Esquema de recorrido","Prohibido girar a la izquierda","Desvío por cambio de sentido de circulación","Inicio de doble circulación"],a:0,exp:"Esta señal muestra el esquema del recorrido que debe seguir el conductor, indicando el trayecto habilitado en esa intersección."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_149.png",q:"¿Qué indica esta señal?",opts:["Fin de autopista","Indicador de utilización de carriles","Dirección obligatoria en tres sentidos","Carril exclusivo para transporte pesado"],a:1,exp:"Esta señal indica la utilización de carriles, informando al conductor qué maniobras puede realizar desde cada carril."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_150.png",q:"¿Qué indica esta señal?",opts:["Comienzo de autopista","Autopista con peaje","Fin de autopista","Prohibición de adelantamiento"],a:2,exp:"Esta señal indica el fin de la autopista. A partir de ese punto rigen las normas de circulación de una vía ordinaria."},
+{cat:"Señal de tránsito",img:"https://raw.githubusercontent.com/rolive86/senales-transito/main/p12_sign_151.png",q:"¿Qué indica esta señal?",opts:["Comienzo de autopista","Ruta nacional","Carril exclusivo","Ingreso a zona urbana"],a:0,exp:"Esta señal indica el comienzo de una autopista. El conductor ingresa a una vía de alta velocidad con accesos y salidas controladas."}
+];
+
+// ── GAME STATE ──
+var TOTAL=40, TOTAL_SECS=1560, Q_SECS=59, CIRC=69.1;
+var ROUND_SIZE=10, NUM_ROUNDS=4;
+
+var questions=[],cur=0,answered=[],totalScore=0;
+var roundScores=[],curRound=0;
+var comboCount=0;
+var totalSecsLeft=TOTAL_SECS, qSecsLeft=Q_SECS;
+var timerTotal=null,timerQ=null;
+
+// ── UTILS ──
+function shuffle(a){var b=[].concat(a);for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active')});
+  var el=document.getElementById(id);
+  el.classList.add('active');
+  // Scroll both window and the element itself to top
+  window.scrollTo(0,0);
+  el.scrollTop=0;
+  // Force scroll on next frame for mobile Safari
+  requestAnimationFrame(function(){
+    window.scrollTo(0,0);
+    el.scrollTop=0;
+  });
+}
+
+// ── TIMERS ──
+function startTimers(){
+  clearInterval(timerTotal);clearInterval(timerQ);
+  qSecsLeft=Q_SECS;
+  timerTotal=setInterval(function(){
+    totalSecsLeft--;
+    updateTotalRing();
+    if(totalSecsLeft<=0){
+      clearInterval(timerTotal);clearInterval(timerQ);
+      document.getElementById('timeupOverlay').classList.add('show');
+    }
+  },1000);
+  timerQ=setInterval(function(){
+    qSecsLeft--;
+    if(qSecsLeft<=0)qSecsLeft=Q_SECS;
+    updateQRing();
+  },1000);
+}
+function stopTimers(){clearInterval(timerTotal);clearInterval(timerQ);}
+
+function updateTotalRing(){
+  var pct=totalSecsLeft/TOTAL_SECS;
+  document.getElementById('ringTotal').style.strokeDashoffset=CIRC*(1-pct);
+  var m=Math.floor(totalSecsLeft/60),s=totalSecsLeft%60;
+  var str=m+':'+(s<10?'0':'')+s;
+  document.getElementById('valTotal').textContent=m;
+  document.getElementById('valTotalFull').textContent=str;
+  var color=totalSecsLeft<300?'var(--wrong)':'var(--px-yellow)';
+  document.getElementById('ringTotal').style.stroke=color;
+}
+function updateQRing(){
+  var pct=qSecsLeft/Q_SECS;
+  document.getElementById('ringQ').style.strokeDashoffset=CIRC*(1-pct);
+  document.getElementById('valQ').textContent=qSecsLeft;
+  document.getElementById('valQFull').textContent=qSecsLeft;
+}
+
+// ── ROUND PIPS ──
+function updateRoundPips(){
+  var pips=document.querySelectorAll('.round-pip');
+  pips.forEach(function(p,i){
+    p.classList.remove('done','active');
+    if(i<curRound)p.classList.add('done');
+    else if(i===curRound)p.classList.add('active');
+  });
+  document.getElementById('hudRoundLabel').textContent='RONDA '+(curRound+1);
+}
+
+// ── COMBO ──
+function showCombo(count){
+  if(count<2)return;
+  var badge=document.getElementById('comboBadge');
+  var labels={2:'x2 COMBO!',3:'x3 COMBO!',4:'x4 COMBO!',5:'x5 COMBO!'};
+  var subs={2:'¡Buena racha!',3:'¡Imparable!',4:'¡Increíble!',5:'¡LEGENDARY!'};
+  document.getElementById('comboText').textContent=labels[Math.min(count,5)]||('x'+count+' COMBO!');
+  document.getElementById('comboSub').textContent=subs[Math.min(count,5)]||'¡Sos una máquina!';
+  badge.classList.remove('show');
+  void badge.offsetWidth;
+  badge.classList.add('show');
+  setTimeout(function(){badge.classList.remove('show')},1000);
+}
+
+// ── START QUIZ ──
+function startQuiz(){
+  questions=shuffle(BANK).slice(0,TOTAL);
+  cur=0;
+  answered=new Array(TOTAL).fill(null);
+  totalScore=0;
+  roundScores=[];
+  curRound=0;
+  comboCount=0;
+  totalSecsLeft=TOTAL_SECS;
+  updateTotalRing();
+  updateQRing();
+  updateRoundPips();
+  document.getElementById('scoreVal').textContent='0';
+  document.getElementById('timeupOverlay').classList.remove('show');
+  document.getElementById('roundPopup').classList.remove('show');
+  goScreen('quiz');
+  renderQ();
+  startTimers();
+}
+
+// ── RENDER QUESTION ──
+function renderQ(){
+  var q=questions[cur];
+  var n=cur+1;
+  var roundQ=(cur%ROUND_SIZE)+1;
+
+  // Progress within current round
+  var roundPct=(roundQ/ROUND_SIZE*100);
+  document.getElementById('progFill').style.width=roundPct+'%';
+
+  // Meta
+  document.getElementById('qNum').textContent='P.'+(n<10?'0'+n:n);
+  document.getElementById('catLabel').textContent=q.cat;
+  document.getElementById('qText').textContent=q.q;
+
+  // Image
+  var imgWrap=document.getElementById('qImgWrap');
+  var imgEl=document.getElementById('qImg');
+  if(q.img){
+    if(q.img.startsWith('http')){
+      imgEl.src=q.img;imgWrap.classList.add('visible');
+    } else if(typeof SIGNS!=='undefined'&&SIGNS[q.img]){
+      imgEl.src=SIGNS[q.img];imgWrap.classList.add('visible');
+    } else {
+      imgWrap.classList.remove('visible');imgEl.src='';
+    }
+  } else {
+    imgWrap.classList.remove('visible');imgEl.src='';
+  }
+
+  // Options
+  var list=document.getElementById('optsList');
+  list.innerHTML='';
+  ['A','B','C','D'].forEach(function(l,i){
+    var b=document.createElement('button');
+    b.className='opt-btn';
+    b.innerHTML='<span class="opt-letter">'+l+'</span><span class="opt-text">'+q.opts[i]+'</span>';
+    b.addEventListener('click',function(){selectAnswer(i);});
+    list.appendChild(b);
+  });
+
+  // Feedback
+  document.getElementById('feedbackBox').className='feedback-box';
+
+  // Restore state
+  if(answered[cur]!==null)applyUI(answered[cur]);
+
+  // Nav
+  document.getElementById('btnPrev').disabled=cur===0;
+  var isLast=cur===TOTAL-1;
+  var isRoundEnd=((cur+1)%ROUND_SIZE===0);
+  document.getElementById('btnNext').disabled=answered[cur]===null;
+  if(isLast){
+    document.getElementById('btnNext').textContent='VER RESULTADO →';
+  } else if(isRoundEnd && answered[cur]!==null){
+    document.getElementById('btnNext').textContent='FIN DE RONDA →';
+  } else {
+    document.getElementById('btnNext').textContent='SIGUIENTE →';
+  }
+}
+
+// ── ANSWER ──
+function selectAnswer(idx){
+  if(answered[cur]!==null)return;
+  answered[cur]=idx;
+  var correct=idx===questions[cur].a;
+  if(correct){
+    totalScore++;
+    comboCount++;
+    showCombo(comboCount);
+  } else {
+    comboCount=0;
+  }
+  document.getElementById('scoreVal').textContent=totalScore;
+  applyUI(idx);
+  document.getElementById('btnNext').disabled=false;
+  var isRoundEnd=((cur+1)%ROUND_SIZE===0);
+  if(isRoundEnd&&cur<TOTAL-1){
+    document.getElementById('btnNext').textContent='FIN DE RONDA →';
+  }
+}
+
+function applyUI(sel){
+  var q=questions[cur];
+  document.querySelectorAll('.opt-btn').forEach(function(b,i){
+    b.classList.add('locked');
+    if(i===q.a)b.classList.add('state-correct');
+    else if(i===sel&&i!==q.a)b.classList.add('state-wrong');
+    else b.classList.add('state-dim');
+  });
+  var isOk=sel===q.a;
+  var fb=document.getElementById('feedbackBox');
+  document.getElementById('fbHead').textContent=isOk?'¡CORRECTO! +1':'INCORRECTO';
+  document.getElementById('fbBody').textContent=q.exp;
+  fb.className='feedback-box visible '+(isOk?'fb-ok':'fb-ko');
+}
+
+// ── NAVIGATION ──
+function nextQ(){
+  var isRoundEnd=((cur+1)%ROUND_SIZE===0);
+  var isLast=cur===TOTAL-1;
+
+  if(isLast){showResults();return;}
+
+  if(isRoundEnd){
+    // Tally round score
+    var roundStart=curRound*ROUND_SIZE;
+    var roundCorrect=0;
+    for(var i=roundStart;i<roundStart+ROUND_SIZE;i++){
+      if(answered[i]===questions[i].a)roundCorrect++;
+    }
+    roundScores.push(roundCorrect);
+    showRoundPopup(roundCorrect);
+    return;
+  }
+
+  // Slide transition
+  var body=document.getElementById('quizBody');
+  body.classList.add('q-slide-out');
+  setTimeout(function(){
+    body.classList.remove('q-slide-out');
+    cur++;
+    renderQ();
+    body.classList.add('q-slide');
+    setTimeout(function(){body.classList.remove('q-slide')},300);
+  },250);
+}
+
+function prevQ(){
+  if(cur>0){
+    var body=document.getElementById('quizBody');
+    body.style.animation='none';
+    cur--;renderQ();
+  }
+}
+
+// ── ROUND POPUP ──
+function showRoundPopup(score){
+  var overlay=document.getElementById('roundPopup');
+  overlay.style.display='';  // clear any inline display:none
+  stopTimers();
+  var medals=['🚗','🥉','🥈','🥇'];
+  var msgs=[
+    'Uy, complicado. Pero seguís en carrera.',
+    'Pasable. Podés mejorar en la siguiente.',
+    'Bien hecho. Vas por buen camino.',
+    '¡Perfecto! Sos un capo del volante. 🎮'
+  ];
+  var medalIdx=score<=3?0:score<=5?1:score<=8?2:3;
+  var stars='';
+  var starCount=score<=3?1:score<=5?2:score<=8?3:4;
+  for(var i=0;i<4;i++){
+    stars+='<span class="popup-star" style="animation-delay:'+(i*0.1)+'s">'+(i<starCount?'⭐':'☆')+'</span>';
+  }
+
+  document.getElementById('popupRoundLabel').textContent='RONDA '+(curRound+1)+' COMPLETA';
+  document.getElementById('popupMedal').textContent=medals[medalIdx];
+  document.getElementById('popupScore').textContent=score+'/10';
+  document.getElementById('popupStars').innerHTML=stars;
+  document.getElementById('popupMsg').textContent=msgs[medalIdx];
+
+  var isLastRound=(curRound===NUM_ROUNDS-2&&cur===TOTAL-ROUND_SIZE-1);
+  var continueBtn=document.getElementById('popupContinueBtn');
+  continueBtn.textContent='Siguiente ronda →';
+
+  document.getElementById('roundPopup').classList.add('show');
+}
+
+function continueAfterRound(){
+  var overlay=document.getElementById('roundPopup');
+  overlay.classList.remove('show');
+  overlay.style.display='none';
+  curRound++;
+  updateRoundPips();
+  var body=document.getElementById('quizBody');
+  cur++;
+  renderQ();
+  body.classList.add('q-slide');
+  setTimeout(function(){body.classList.remove('q-slide')},300);
+  startTimers();
+}
+
+function finishFromPopup(){
+  var overlay=document.getElementById('roundPopup');
+  overlay.classList.remove('show');
+  overlay.style.display='none';
+  setTimeout(function(){showResults();},100);
+}
+
+// ── RESULTS ──
+function showResults(){
+  stopTimers();
+  var pct=Math.round(totalScore/TOTAL*100);
+
+  // Tally last round if not done
+  var lastRoundStart=curRound*ROUND_SIZE;
+  if(roundScores.length<=curRound){
+    var lrc=0;
+    for(var i=lastRoundStart;i<=cur&&i<TOTAL;i++){
+      if(answered[i]===questions[i].a)lrc++;
+    }
+    roundScores.push(lrc);
+  }
+
+  document.getElementById('resPct').textContent=totalScore;
+
+  var trophy,title,sub;
+  if(pct>=90){trophy='🏆';title='¡GANASTE!';sub='Maestro del volante';}
+  else if(pct>=70){trophy='🥇';title='APROBADO';sub='Buen conductor';}
+  else if(pct>=50){trophy='🥈';title='REGULAR';sub='Seguí practicando';}
+  else{trophy='🚗';title='¡INTENTÁ DE NUEVO!';sub='¡A repasar y volver a intentarlo!'}
+
+  document.getElementById('resTrophy').textContent=trophy;
+  document.getElementById('resTitle').textContent=title;
+  document.getElementById('resSub').textContent=sub;
+  document.getElementById('resCor').textContent=totalScore;
+  document.getElementById('resWro').textContent=TOTAL-totalScore;
+
+  // Round badges
+  var medalMap=['🚗','🥉','🥈','🥇'];
+  var badgesHTML='';
+  roundScores.forEach(function(s,i){
+    var mi=s<=3?0:s<=5?1:s<=8?2:3;
+    badgesHTML+='<div class="rb-item"><span class="rb-medal">'+medalMap[mi]+'</span><span class="rb-lbl">R'+(i+1)+'<br>'+s+'/10</span></div>';
+  });
+  document.getElementById('roundBadges').innerHTML=badgesHTML;
+
+  // Show share button only when approved (>=50%)
+  goScreen('results');
+  // Show share button after screen transition
+  setTimeout(function(){
+    var shareSection=document.getElementById('shareSection');
+    if(shareSection){shareSection.style.display=pct>=50?'block':'none';}
+  },50);
+}
+
+function finishByTimeout(){
+  document.getElementById('timeupOverlay').classList.remove('show');
+  showResults();
+}
+
+// ── REVIEW ──
+function showReview(){
+  var list=document.getElementById('reviewList');list.innerHTML='';
+  questions.forEach(function(q,i){
+    var sel=answered[i],ok=sel===q.a;
+    var div=document.createElement('div');
+    div.className='review-item '+(ok?'ri-ok':'ri-ko');
+    div.innerHTML='<div class="ri-num">'+(ok?'✓':'✗')+' PREGUNTA '+(i+1)+' — '+q.cat+'</div>'+
+      '<div class="ri-q">'+q.q+'</div>'+
+      '<div class="ri-exp">'+q.exp+'</div>';
+    list.appendChild(div);
+  });
+  goScreen('review');
+}
+
+// Init rings
+updateTotalRing();updateQRing();
+
+// ── SHARE RESULT ──
+function shareResult(){
+  // Update share card data
+  var pct=Math.round(totalScore/TOTAL*100);
+  var trophy=pct>=90?'🏆':pct>=70?'🥇':pct>=50?'🥈':'🚗';
+  var title=pct>=90?'¡GANASTE!':pct>=70?'APROBADO':pct>=50?'REGULAR':'¡INTENTÁ DE NUEVO!';
+  var sub=pct>=90?'Maestro del volante':pct>=70?'Buen conductor':pct>=50?'Seguí practicando':'¡A repasar!';
+
+  document.getElementById('sc-trophy').textContent=trophy;
+  document.getElementById('sc-title').textContent=title;
+  document.getElementById('sc-sub').textContent=sub;
+  document.getElementById('sc-score').textContent=totalScore;
+  document.getElementById('sc-ok').textContent=totalScore;
+  document.getElementById('sc-ko').textContent=(TOTAL-totalScore);
+  document.getElementById('sc-pct').textContent=pct+'%';
+
+  // Round badges
+  var medalMap=['🚗','🥉','🥈','🥇'];
+  var badgesEl=document.getElementById('sc-badges');
+  badgesEl.innerHTML='';
+  roundScores.forEach(function(s,i){
+    var mi=s<=3?0:s<=5?1:s<=8?2:3;
+    var d=document.createElement('div');
+    d.style.cssText='text-align:center';
+    d.innerHTML='<div style="font-size:24px">'+medalMap[mi]+'</div><div style="font-size:9px;color:rgba(255,255,255,.5);margin-top:2px;font-family:monospace">R'+(i+1)+'</div>';
+    badgesEl.appendChild(d);
+  });
+
+  // Show modal
+  var modal=document.getElementById('shareModal');
+  modal.style.display='flex';
+  document.getElementById('shareLoadingMsg').textContent='Generando imagen...';
+
+  // Render card to canvas
+  var card=document.getElementById('shareCard');
+  card.style.left='-9999px';
+  card.style.display='flex';
+
+  // Wait for fonts then render
+  setTimeout(function(){
+    html2canvas(card,{
+      scale:2,
+      backgroundColor:null,
+      useCORS:true,
+      logging:false
+    }).then(function(canvas){
+      var preview=document.getElementById('shareCanvas');
+      // Copy to preview
+      preview.width=canvas.width;
+      preview.height=canvas.height;
+      var ctx=preview.getContext('2d');
+      ctx.drawImage(canvas,0,0);
+      // Store for download
+      window._shareCanvas=canvas;
+      document.getElementById('shareLoadingMsg').textContent='¡Listo! Descargá o compartí tu resultado 🪪';
+    }).catch(function(){
+      document.getElementById('shareLoadingMsg').textContent='Usá captura de pantalla para compartir.';
+    });
+  },300);
+}
+
+function downloadShareCard(){
+  if(!window._shareCanvas){
+    showShareToast('Esperá que se genere la imagen...');return;
+  }
+  var link=document.createElement('a');
+  link.download='mi-resultado-san-fernando.png';
+  link.href=window._shareCanvas.toDataURL('image/png');
+  link.click();
+}
+
+function nativeShare(){
+  if(!window._shareCanvas){
+    showShareToast('Esperá que se genere la imagen...');return;
+  }
+  window._shareCanvas.toBlob(function(blob){
+    var file=new File([blob],'resultado-san-fernando.png',{type:'image/png'});
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({
+        files:[file],
+        title:'Test de Manejo — San Fernando',
+        text:'¡Mirá mi resultado en el Test de Manejo de San Fernando!'
+      }).catch(function(e){console.log(e);});
+    } else if(navigator.share){
+      navigator.share({
+        title:'Test de Manejo — San Fernando',
+        text:'🚗 Hice el Test de Manejo de San Fernando. ¿Podés superarme?',
+        url:window.location.href
+      });
+    } else {
+      downloadShareCard();
+    }
+  });
+}
+
+function closeShareModal(){
+  document.getElementById('shareModal').style.display='none';
+}
+
+function showShareToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:#2868A8;color:#fff;padding:12px 24px;border-radius:10px;font-family:Archivo,sans-serif;font-weight:700;font-size:14px;z-index:999;border:2px solid #fff;box-shadow:3px 3px 0 rgba(0,0,0,.3);white-space:nowrap';
+  t.textContent=msg||'📋 ¡Copiado!';
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();},3000);
+}
+
+</script>
+
+<!-- SHARE CARD — hidden, rendered to canvas for sharing -->
+<div id="shareCard" style="
+  position:fixed;left:-9999px;top:0;
+  width:360px;height:640px;
+  background:linear-gradient(160deg,#2868A8 0%,#0088C8 55%,#40A0D8 100%);
+  border-radius:24px;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:'Archivo',sans-serif;
+  padding:32px 28px;
+  ">
+  <!-- Logo -->
+  <img src="assets/sanfer-horizontal.png" alt="San Fernando Municipio" class="brand-logo brand-logo--modal" style="max-height:56px;width:auto;margin-bottom:28px;background:#fff;padding:10px 14px;border-radius:14px;box-sizing:content-box"/>
+  <!-- Title -->
+  <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:rgba(255,255,255,.6);letter-spacing:2px;margin-bottom:16px;text-transform:uppercase">Test de Manejo</div>
+  <!-- Trophy + result -->
+  <div id="sc-trophy" style="font-size:64px;line-height:1;margin-bottom:12px">🏆</div>
+  <div id="sc-title" style="font-family:'Press Start 2P',monospace;font-size:18px;color:#fff;margin-bottom:8px;text-align:center;line-height:1.4">APROBADO</div>
+  <div id="sc-sub" style="font-size:14px;color:rgba(255,255,255,.7);margin-bottom:32px;font-weight:600">Buen conductor</div>
+  <!-- Score ring -->
+  <div style="
+    width:130px;height:130px;
+    border:4px solid rgba(255,255,255,.3);
+    border-radius:50%;
+    background:rgba(255,255,255,.08);
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    margin-bottom:28px;
+    ">
+    <div id="sc-score" style="font-family:'Press Start 2P',monospace;font-size:36px;color:#fff;line-height:1">35</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.6);margin-top:6px;font-weight:700;letter-spacing:1px">/ 40</div>
+  </div>
+  <!-- Stats row -->
+  <div style="display:flex;gap:16px;margin-bottom:28px">
+    <div style="text-align:center;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 18px">
+      <div id="sc-ok" style="font-family:'Press Start 2P',monospace;font-size:16px;color:#00e676">35</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:4px;font-weight:600">CORRECTAS</div>
+    </div>
+    <div style="text-align:center;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 18px">
+      <div id="sc-ko" style="font-family:'Press Start 2P',monospace;font-size:16px;color:#ff5252">5</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:4px;font-weight:600">ERRORES</div>
+    </div>
+    <div style="text-align:center;background:rgba(255,255,255,.12);border-radius:12px;padding:10px 18px">
+      <div id="sc-pct" style="font-family:'Press Start 2P',monospace;font-size:16px;color:#FFD600">87%</div>
+      <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:4px;font-weight:600">SCORE</div>
+    </div>
+  </div>
+  <!-- Round badges -->
+  <div id="sc-badges" style="display:flex;gap:12px;margin-bottom:28px"></div>
+  <!-- CTA footer -->
+  <div style="font-size:12px;color:rgba(255,255,255,.5);font-weight:600;letter-spacing:.5px">San Fernando Municipio 🚗</div>
+</div>
+
+<!-- SHARE MODAL -->
+<div id="shareModal" style="
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(10,15,60,.92);
+  align-items:center;justify-content:center;
+  padding:20px;flex-direction:column;gap:16px;
+  ">
+  <div style="
+    background:#fff;border-radius:20px;
+    border:3px solid #2868A8;
+    box-shadow:6px 6px 0 #2868A8;
+    padding:20px;width:100%;max-width:340px;
+    text-align:center;
+    ">
+    <div style="font-family:'Press Start 2P',monospace;font-size:10px;color:#2868A8;margin-bottom:12px;letter-spacing:1px">¡COMPARTÍ TU RESULTADO!</div>
+    <!-- Preview of share card -->
+    <canvas id="shareCanvas" style="
+      width:100%;max-width:240px;height:auto;
+      border-radius:12px;
+      border:2px solid #e8eaed;
+      display:block;margin:0 auto 16px;
+    "></canvas>
+    <div id="shareLoadingMsg" style="font-size:12px;color:#9090aa;margin-bottom:12px">Generando imagen...</div>
+    <button onclick="downloadShareCard()" style="
+      width:100%;padding:14px;margin-bottom:10px;
+      background:linear-gradient(135deg,#0088C8,#2868A8);
+      color:#fff;border:2.5px solid #2868A8;
+      box-shadow:3px 3px 0 #2868A8;border-radius:12px;
+      font-family:'Archivo',sans-serif;font-size:14px;font-weight:900;
+      cursor:pointer;text-transform:uppercase;
+      ">⬇ Descargar imagen</button>
+    <button onclick="nativeShare()" id="nativeShareBtn" style="
+      width:100%;padding:14px;margin-bottom:10px;
+      background:#fff;color:#2868A8;
+      border:2px solid #dde8e1;
+      box-shadow:2px 2px 0 #dde8e1;border-radius:12px;
+      font-family:'Archivo',sans-serif;font-size:14px;font-weight:700;
+      cursor:pointer;
+      ">📤 Compartir en redes</button>
+    <button onclick="closeShareModal()" style="
+      width:100%;padding:12px;
+      background:#fff;color:#9090aa;
+      border:1.5px solid #e8eaed;border-radius:12px;
+      font-family:'Archivo',sans-serif;font-size:13px;font-weight:600;
+      cursor:pointer;
+      ">Cerrar</button>
+  </div>
+</div>
+
+</body>
+</html>
