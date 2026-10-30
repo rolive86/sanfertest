@@ -686,7 +686,10 @@ $('simBtn').onclick=function(){startQuiz('sim')};
 $('faqInput').oninput=function(){renderFaq(this.value)};
 $('demoBtn').onclick=function(){P.demo=!P.demo;save();renderNodes();toast(P.demo?'Modo demo: todos los niveles abiertos':'Modo demo desactivado')};
 $('resetBtn').onclick=function(){P={stars:{},demo:false,tutSeen:true};CARAT=null;save();renderNodes();scrollToCurrent(true);toast('Progreso reiniciado')};
-window.addEventListener('load',function(){clampLabels();scrollToCurrent(false);if(!P.tutSeen)showTut(0)});
+window.addEventListener('load',function(){clampLabels();scrollToCurrent(false);
+ // Atajo de prueba: ?foto=1 completa el juego y abre la foto de conductor (quitar en producción)
+ if(/[?&]foto=1/.test(location.search)){LEVELS.forEach(function(L){P.stars[L.n]=3});P.tutSeen=true;save();renderNodes();openCam();return}
+ if(!P.tutSeen)showTut(0)});
 $('helpBtn').onclick=function(){showTut(0)};
 $('camClose').onclick=closeCam;$('camRetry').onclick=openCam;$('camSave').onclick=saveShot;$('camWa').onclick=sendWa;
 $('camOk').onchange=function(){$('camWa').disabled=!this.checked};
