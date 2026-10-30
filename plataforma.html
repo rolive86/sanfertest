@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0088C8">
+<title>Tránsito · Municipio de San Fernando</title>
+<link rel="icon" href="assets/sanfer-isotipo.png" type="image/png">
+<link rel="apple-touch-icon" href="assets/sanfer-isotipo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;700;800;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--blue:#0088C8;--blue-dk:#2868A8;--orange:#E89000;--ink:#0f2a44;--muted:#6b7686;--bg:#eef4f9;--ok:#00b84a;--ko:#ff2d55;--px:3px 3px 0 #2868A8}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'Archivo',sans-serif;background:var(--bg);color:var(--ink);overflow:hidden;-webkit-font-smoothing:antialiased}
+.px{font-family:'Press Start 2P',monospace}
+.app{display:flex;flex-direction:column;height:100dvh;max-width:520px;margin:0 auto;background:#fff;position:relative;box-shadow:0 0 0 1px #dce6ef;overflow:hidden}
+header.top{display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));background:var(--blue);color:#fff;border-bottom:3px solid var(--blue-dk);z-index:5}
+header.top img{height:32px;width:32px;object-fit:contain;background:#fff;border-radius:6px;padding:2px}
+.brand-t{flex:1;min-width:0;line-height:1}
+.brand-t span{display:block;font-family:'Press Start 2P',monospace;font-size:7px;letter-spacing:.5px;opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
+.brand-t b{display:block;font-family:'Archivo',sans-serif;font-weight:900;font-size:20px;letter-spacing:-.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.starbox{flex-shrink:0;font-family:'Press Start 2P',monospace;font-size:8px;background:#fff;color:var(--blue-dk);border:2px solid var(--blue-dk);box-shadow:2px 2px 0 var(--orange);padding:7px 8px;border-radius:6px;white-space:nowrap}
+main{flex:1;overflow:hidden;position:relative}
+.tab{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;display:none}
+.tab.active{display:block}
+nav.tabs{display:grid;grid-template-columns:repeat(4,1fr);border-top:3px solid var(--blue-dk);background:#fff;padding-bottom:env(safe-area-inset-bottom);z-index:5}
+nav.tabs button{background:none;border:0;padding:8px 2px 10px;font-family:'Archivo',sans-serif;font-weight:800;font-size:11px;color:var(--muted);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+nav.tabs button .ic{font-size:20px;line-height:1;filter:grayscale(1);opacity:.6}
+nav.tabs button.on{color:var(--blue)}
+nav.tabs button.on .ic{filter:none;opacity:1}
+.mapwrap{position:relative;width:100%;background:#2b7bd6;overflow:hidden}
+#tab-mapa{overflow-x:hidden}
+#map{display:block;width:100%;height:auto;image-rendering:pixelated;image-rendering:crisp-edges}
+#nodes{position:absolute;inset:0}
+.node{position:absolute;transform:translate(-50%,-50%);width:26px;height:26px;border-radius:50%;border:3px solid var(--blue-dk);background:var(--orange);color:#fff;font-family:'Press Start 2P',monospace;font-size:12px;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 0 var(--blue-dk);cursor:pointer;z-index:2;padding:0}
+.node.done{background:var(--ok)}
+.node.locked{background:#9aa4b1;border-color:#5d6773;box-shadow:0 4px 0 #5d6773;font-size:14px}
+.node.current{animation:pulse 1.1s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.13)}}
+.nlabel.below{transform:translate(-50%,16px)}.nlabel.above{transform:translate(-50%,calc(-100% - 16px))}.nlabel.left{transform:translate(calc(-100% - 16px),-50%)}.nlabel.right{transform:translate(16px,-50%)}
+.nlabel{position:absolute;font-family:'Press Start 2P',monospace;font-size:6px;background:#fff;border:2px solid var(--blue-dk);padding:3px 4px 2px;white-space:nowrap;border-radius:4px;color:var(--blue-dk);z-index:2;pointer-events:none;text-align:center;line-height:1.3}
+.nstars{display:block;color:var(--orange);font-size:9px;letter-spacing:1px;font-family:sans-serif}
+.slabel{position:absolute;font-family:'Archivo',sans-serif;font-weight:800;font-size:7px;color:#fff;text-shadow:0 0 2px #000,0 0 2px #000;white-space:nowrap;pointer-events:none;z-index:1;letter-spacing:.2px}
+.slabel.av{font-size:8px;color:#ffe9a8}
+.slabel.big{font-family:'Press Start 2P',monospace;font-size:9px;letter-spacing:2px}
+.slabel.poi{background:#fff;color:var(--blue-dk);text-shadow:none;padding:1px 3px;border-radius:3px;border:1px solid var(--blue-dk)}
+.slabel.sign{background:#1b7a3a;color:#fff;text-shadow:none;padding:2px 4px;border-radius:3px;border:1px solid #fff}
+.compass{position:absolute;width:30px;height:30px;transform:translate(-50%,-50%);border-radius:50%;background:#fff;border:2px solid var(--blue-dk);z-index:1;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.compass i{font-style:normal;font-family:'Press Start 2P',monospace;font-size:6px;line-height:1.2;text-align:center;color:var(--ko);transform:rotate(-45deg)}
+.car{position:absolute;transform:translate(-50%,-100%);margin-top:-12px;z-index:3;pointer-events:none;animation:bob .5s steps(2) infinite;transition:left .4s,top .4s}
+@keyframes bob{50%{margin-top:-16px}}
+.mapnote{padding:14px 16px 22px;font-size:12px;color:var(--muted);display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.linkbtn{background:#fff;border:2px dashed #c8d4e0;color:var(--blue-dk);font-weight:800;font-size:12px;padding:7px 10px;border-radius:8px;cursor:pointer;font-family:'Archivo',sans-serif}
+.backdrop{position:absolute;inset:0;background:rgba(10,30,50,.45);z-index:20;display:none}
+.backdrop.on{display:block}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:3px solid var(--blue-dk);border-radius:18px 18px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));z-index:21;transform:translateY(105%);transition:transform .25s}
+.sheet.on{transform:none}
+.sheet .kicker{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--orange)}
+.sheet h2{font-size:24px;font-weight:900;letter-spacing:-.5px;margin:8px 0 6px;color:var(--blue-dk)}
+.sheet p{font-size:14px;line-height:1.45;color:#33475b}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.chip{font-size:11px;font-weight:800;border:2px solid var(--blue);color:var(--blue-dk);padding:5px 9px;border-radius:6px;box-shadow:2px 2px 0 var(--blue)}
+.btn{display:block;width:100%;padding:16px;background:var(--blue);color:#fff;border:3px solid var(--blue-dk);box-shadow:4px 4px 0 var(--orange);border-radius:14px;font-family:'Archivo',sans-serif;font-weight:900;font-size:16px;text-transform:uppercase;cursor:pointer;text-align:center;text-decoration:none}
+.btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--orange)}
+.btn.sec{background:#fff;color:var(--blue-dk);box-shadow:4px 4px 0 var(--blue-dk);margin-top:12px}
+.quiz{position:absolute;inset:0;background:#fff;z-index:30;display:none;flex-direction:column}
+.quiz.on{display:flex}
+.qhud{display:flex;align-items:center;gap:10px;padding:12px 14px;padding-top:max(12px,env(safe-area-inset-top));background:var(--blue);color:#fff;border-bottom:3px solid var(--blue-dk)}
+.qhud button{background:#fff;color:var(--blue-dk);border:2px solid var(--blue-dk);border-radius:6px;font-weight:900;width:34px;height:34px;cursor:pointer;font-size:14px}
+.qhud .t{flex:1;font-family:'Press Start 2P',monospace;font-size:8px;line-height:1.6}
+.qhud .sc{font-family:'Press Start 2P',monospace;font-size:10px}
+.qhud .qlogo{height:34px;width:34px;object-fit:contain;background:#fff;border-radius:6px;padding:2px;border:2px solid var(--blue-dk);flex-shrink:0}
+.qhud .t small{display:block;font-family:'Archivo',sans-serif;font-size:10px;font-weight:700;opacity:.9;letter-spacing:0;margin-top:2px}
+.qfoot{border-top:3px solid var(--blue-dk);background:#f4f8fb;padding:12px 14px calc(10px + env(safe-area-inset-bottom))}
+.qstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+.qstat{background:#fff;border:2px solid var(--blue);box-shadow:2px 2px 0 var(--blue-dk);border-radius:8px;padding:8px 4px 6px;text-align:center}
+.qstat b{font-family:'Press Start 2P',monospace;font-size:12px;color:var(--blue-dk);display:block;margin-bottom:5px}
+.qstat span{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.qtip{display:block;font-size:12px;font-weight:700;color:var(--blue-dk);text-decoration:none;margin-bottom:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.road{position:relative;height:30px;background:#4b5260;border-top:3px solid #c9ced6;border-bottom:3px solid #c9ced6;border-radius:4px;overflow:hidden}
+.road:before{content:'';position:absolute;left:0;right:30px;top:50%;height:2px;margin-top:-1px;background:repeating-linear-gradient(90deg,#f4d03f 0 10px,transparent 10px 20px)}
+.road .goal{position:absolute;right:0;top:0;bottom:0;width:24px;background:repeating-conic-gradient(#fff 0 25%,#111 0 50%) 0 0/8px 8px}
+.road .rcar{position:absolute;top:50%;left:0;transform:translate(0,-50%);transition:left .5s steps(6)}
+.qbrand{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;font-size:10px;font-weight:700;color:var(--muted)}
+.qbrand img{height:22px;width:auto}
+.bar{height:8px;background:#dfe8f0}
+.bar i{display:block;height:100%;background:var(--orange);width:0;transition:width .3s}
+.qbody{flex:1;overflow-y:auto;padding:18px 16px 28px}
+.qcat{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--blue);margin-bottom:10px;line-height:1.5}
+.qtext{font-size:19px;font-weight:800;line-height:1.3;margin-bottom:14px}
+.qimg{max-width:100%;max-height:170px;display:block;margin:0 auto 14px}
+.opt{display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;background:#fff;border:2.5px solid var(--blue);box-shadow:var(--px);border-radius:10px;padding:13px 12px;margin-bottom:10px;font-family:'Archivo',sans-serif;font-size:15px;font-weight:600;color:var(--ink);cursor:pointer}
+.opt b{font-family:'Press Start 2P',monospace;font-size:9px;color:var(--blue-dk);padding-top:3px}
+.opt.ok{background:#eafff2;border-color:var(--ok);box-shadow:3px 3px 0 var(--ok)}
+.opt.ko{background:#fff0f3;border-color:var(--ko);box-shadow:3px 3px 0 var(--ko)}
+.opt[disabled]{cursor:default}
+.fb{border-radius:10px;padding:12px;margin:6px 0 14px;font-size:14px;line-height:1.45;display:none}
+.fb.on{display:block}
+.fb.ok{background:#eafff2;border:2px solid var(--ok)}
+.fb.ko{background:#fff0f3;border:2px solid var(--ko)}
+.fb strong{display:block;font-family:'Press Start 2P',monospace;font-size:9px;margin-bottom:8px}
+.combo{position:absolute;top:84px;left:50%;transform:translateX(-50%);font-family:'Press Start 2P',monospace;font-size:12px;color:#fff;background:var(--orange);border:3px solid var(--blue-dk);padding:9px 12px;border-radius:8px;display:none;z-index:31;white-space:nowrap}
+.combo.on{display:block;animation:pop .6s}
+@keyframes pop{0%{transform:translateX(-50%) scale(.4)}60%{transform:translateX(-50%) scale(1.15)}100%{transform:translateX(-50%) scale(1)}}
+.res{text-align:center;padding:28px 6px}
+.res .big{font-size:46px;letter-spacing:6px;color:var(--orange);margin:14px 0}
+.res h2{font-size:26px;font-weight:900;color:var(--blue-dk)}
+.res p{color:#33475b;margin:8px 0 22px;font-size:15px;line-height:1.5}
+.pad{padding:20px 16px 30px}
+.h1{font-size:24px;font-weight:900;color:var(--blue-dk);letter-spacing:-.5px}
+.lead{color:var(--muted);font-size:14px;margin:6px 0 16px;line-height:1.45}
+.card{display:flex;gap:12px;align-items:center;border:2.5px solid var(--blue);box-shadow:var(--px);border-radius:12px;padding:12px;margin-bottom:12px;text-decoration:none;color:var(--ink);background:#fff}
+.card .n{font-family:'Press Start 2P',monospace;font-size:10px;background:var(--orange);color:#fff;border:2px solid var(--blue-dk);width:38px;height:38px;display:flex;align-items:center;justify-content:center;border-radius:6px;flex-shrink:0}
+.card b{display:block;font-size:15px}
+.card small{color:var(--muted);font-size:12px}
+.soon{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--orange);border:2px dashed var(--orange);padding:12px;border-radius:8px;margin:18px 0;line-height:1.8}
+details{border:2.5px solid var(--blue);box-shadow:var(--px);border-radius:12px;margin-bottom:12px;background:#fff}
+summary{padding:13px 12px;font-weight:800;cursor:pointer;list-style:none;font-size:15px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:'+ ';font-family:'Press Start 2P',monospace;font-size:10px;color:var(--orange)}
+details[open] summary::before{content:'- '}
+details p{padding:0 12px 14px;font-size:14px;line-height:1.5;color:#33475b}
+.ask input{width:100%;border:2.5px solid var(--blue);border-radius:10px;padding:13px 12px;font-family:'Archivo',sans-serif;font-size:16px;margin-bottom:16px;box-shadow:var(--px);outline:none}
+.simbox{border:3px solid var(--blue-dk);box-shadow:4px 4px 0 var(--orange);border-radius:14px;padding:18px;margin:12px 0 20px}
+.simbox ul{margin:10px 0 0 18px;font-size:14px;line-height:1.8}
+.toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:10px 14px;border-radius:10px;z-index:40;display:none;width:max-content;max-width:88%;text-align:center}
+.toast.on{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <img src="assets/sanfer-isotipo.png" alt="San Fernando">
+    <div class="brand-t"><span>MUNICIPIO DE SAN FERNANDO</span><b>Tránsito</b></div>
+    <div class="starbox" id="starbox">★ 0/24</div>
+  </header>
+  <main>
+    <section class="tab active" id="tab-mapa">
+      <div class="mapwrap" id="mapwrap">
+        <canvas id="map" width="192" height="300"></canvas>
+        <div id="labels"></div>
+        <div id="nodes"></div>
+        <div class="car" id="car"><svg width="27" height="18" viewBox="0 0 12 8" shape-rendering="crispEdges"><rect x="3" y="0" width="6" height="3" fill="#2868A8"/><rect x="4" y="1" width="2" height="2" fill="#bfe3ff"/><rect x="7" y="1" width="1" height="2" fill="#bfe3ff"/><rect x="0" y="3" width="12" height="3" fill="#E89000"/><rect x="11" y="3" width="1" height="1" fill="#ffe082"/><rect x="0" y="5" width="12" height="1" fill="#2868A8"/><rect x="2" y="6" width="2" height="2" fill="#111"/><rect x="8" y="6" width="2" height="2" fill="#111"/></svg></div>
+      </div>
+      <div class="mapnote">
+        <span>Centro de San Fernando · río arriba · prototipo</span>
+        <span><button class="linkbtn" id="demoBtn">Modo demo</button> <button class="linkbtn" id="resetBtn">Reiniciar</button></span>
+      </div>
+    </section>
+    <section class="tab" id="tab-bib"><div class="pad">
+      <div class="h1">Biblioteca</div>
+      <p class="lead">Manual del Conductor de la Provincia de Buenos Aires, por capítulo. Tocá uno para abrirlo en esa página.</p>
+      <div id="bibList"></div>
+      <div class="soon">PRÓXIMAMENTE: VIDEOS DE 60 SEG POR TEMA, GRABADOS EN CALLES DE SAN FERNANDO, Y FICHAS DE REPASO.</div>
+    </div></section>
+    <section class="tab" id="tab-faq"><div class="pad">
+      <div class="h1">Preguntá</div>
+      <p class="lead">Dudas frecuentes sobre la licencia y el tránsito. Escribí una palabra y también buscamos en el banco de preguntas.</p>
+      <div class="ask"><input id="faqInput" type="search" placeholder="Ej: alcohol, casco, renovar, semáforo…" autocomplete="off"></div>
+      <div id="faqList"></div>
+      <div class="soon">PRÓXIMAMENTE: ASISTENTE QUE RESPONDE SOLO DESDE EL MANUAL, CITANDO LA PÁGINA.</div>
+    </div></section>
+    <section class="tab" id="tab-sim"><div class="pad">
+      <div class="h1">Simulacro de examen</div>
+      <p class="lead">Practicá con el mismo formato del examen teórico para la licencia de conducir.</p>
+      <div class="simbox">
+        <div class="px" style="font-size:8px;color:var(--orange)">REGLAS</div>
+        <ul><li>20 preguntas de todos los temas</li><li>Sin ayudas ni pistas</li><li>Aprobás con 70% <small style="color:var(--muted)">(criterio de ejemplo, ajustable)</small></li></ul>
+      </div>
+      <button class="btn" id="simBtn">▶ Empezar simulacro</button>
+    </div></section>
+  </main>
+  <nav class="tabs">
+    <button class="on" data-tab="mapa"><span class="ic">🗺️</span>Mapa</button>
+    <button data-tab="bib"><span class="ic">📖</span>Biblioteca</button>
+    <button data-tab="faq"><span class="ic">💬</span>Preguntá</button>
+    <button data-tab="sim"><span class="ic">📝</span>Simulacro</button>
+  </nav>
+  <div class="backdrop" id="backdrop"></div>
+  <div class="sheet" id="sheet"><div id="sheetBody"></div></div>
+  <div class="quiz" id="quiz">
+    <div class="qhud"><button id="qClose" aria-label="Cerrar">✕</button><img class="qlogo" src="assets/sanfer-isotipo.png" alt="Municipio de San Fernando"><div class="t" id="qTitle"></div><div class="sc" id="qScore"></div></div>
+    <div class="bar"><i id="qBar"></i></div>
+    <div class="qbody" id="qBody"></div>
+    <div class="qfoot" id="qFoot">
+      <div class="qstats">
+        <div class="qstat"><b id="stOk">0</b><span>Correctas</span></div>
+        <div class="qstat"><b id="stStreak">0</b><span>Racha 🔥</span></div>
+        <div class="qstat"><b id="stKo">0</b><span>Errores</span></div>
+      </div>
+      <a class="qtip" id="qTip" target="_blank" rel="noopener"></a>
+      <div class="road"><div class="goal"></div><div class="rcar" id="rCar"><svg width="33" height="22" viewBox="0 0 12 8" shape-rendering="crispEdges"><rect x="3" y="0" width="6" height="3" fill="#2868A8"/><rect x="4" y="1" width="2" height="2" fill="#bfe3ff"/><rect x="7" y="1" width="1" height="2" fill="#bfe3ff"/><rect x="0" y="3" width="12" height="3" fill="#E89000"/><rect x="11" y="3" width="1" height="1" fill="#ffe082"/><rect x="0" y="5" width="12" height="1" fill="#2868A8"/><rect x="2" y="6" width="2" height="2" fill="#111"/><rect x="8" y="6" width="2" height="2" fill="#111"/></svg></div></div>
+      <div class="qbrand"><img src="assets/sanfer-horizontal.png" alt="Municipio de San Fernando"></div>
+    </div>
+    <div class="combo" id="combo"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+<script src="bank_actualizado.js"></script>
+<script>
+/* ===== NIVELES — mapa del centro de San Fernando, rotado 45° (arriba = Río Luján). Coordenadas en px del canvas 192x300 ===== */
+var LEVELS=[
+ {n:1,tag:"MUNICIPALIDAD",name:"Palacio Municipal",x:124,y:218,lab:"above",cats:["Licencia de conducir","Documentacion"],cap:1,qty:8,place:"Juan N. Madero y Constitución, frente a la plaza: acá arranca el trámite de la licencia. Clases, requisitos y documentación."},
+ {n:2,tag:"ESTACIÓN MITRE",name:"Estación San Fernando",x:145,y:278,lab:"below",cats:["Señal de tránsito","Semáforos"],cap:3,qty:8,place:"Las vías del Mitre: barreras, cruz de San Andrés, semáforos y la cartelería del paso a nivel."},
+ {n:3,tag:"TEATRO OTAMENDI",name:"Teatro Otamendi",x:90,y:258,lab:"left",cats:["Estacionamiento","Ciclistas y peatónes"],cap:2,qty:8,place:"Saliendo del teatro sobre Sarmiento: dónde estacionar, sendas peatonales y convivencia con bicis."},
+ {n:4,tag:"AV. DEL LIBERTADOR",name:"Avenida del Libertador",x:30,y:172,lab:"below",cats:["Velocidades especificas","Distancias de seguridad"],cap:4,qty:8,place:"La avenida que atraviesa San Fernando: velocidades máximas y mínimas, y distancia con el de adelante."},
+ {n:5,tag:"ESTACIÓN R",name:"Estación San Fernando R",x:107,y:126,lab:"below",cats:["Normas de conducción","Responsabilidad vial"],cap:6,qty:8,place:"Tren de la Costa, junto a Escalada: prioridades de paso, normas de circulación y responsabilidad vial."},
+ {n:6,tag:"RÍO LUJÁN",name:"Río Luján",x:88,y:40,lab:"right",cats:["Alcohol y drogas","Elementos de seguridad"],cap:5,qty:8,place:"Salidas de fin de semana al río y a los clubes náuticos: alcohol, drogas y elementos de seguridad."},
+ {n:7,tag:"ZONA INDUSTRIAL",name:"Zona industrial",x:163,y:50,lab:"below",cats:["Transporte profesional","Motovehículos"],cap:8,qty:8,place:"Galpones y camiones cerca del río: transporte profesional, motos y vehículos de carga."},
+ {n:8,tag:"PLAZA MITRE",name:"Examen final",x:107,y:221,lab:"left",cats:null,cap:10,qty:15,place:"Plaza Bartolomé Mitre: el desafío final con preguntas de todos los temas."}
+];
+var CHAPTERS=[[1,"El conductor",3],[2,"La vía pública",25],[3,"Señalamiento vial",39],[4,"Conducir con seguridad",52],[5,"Salud para conducir",77],[6,"Las reglas de su seguridad",89],[7,"Funcionamiento del vehículo",111],[8,"Funcionamiento de la motocicleta",129],[9,"Triciclos y cuatriciclos",161],[10,"Las infracciones de tránsito",165]];
+var FAQ=[
+ ["¿Qué licencia necesito para manejar un auto?","La clase B habilita para automóviles, camionetas y utilitarios de uso privado de hasta 3.500 kg."],
+ ["¿Desde qué edad puedo sacar la licencia de auto?","La clase B requiere tener al menos 17 años cumplidos."],
+ ["Se me venció la licencia, ¿qué hago?","En la Provincia de Buenos Aires se puede renovar hasta 90 días después del vencimiento. Pasado ese plazo hay que tramitarla de nuevo desde cero."],
+ ["¿Dónde estudio para el examen teórico?","En la Biblioteca tenés el Manual del Conductor de la Provincia de Buenos Aires por capítulo, y en el Mapa cada nivel practica un tema del examen."],
+ ["¿Cómo saco turno para la licencia?","Sacá tu turno online en el sistema del Municipio de San Fernando.","https://www1.diphot.com.ar/san-fernando-transito/"]
+];
+/* Calles reales (orden y espaciado medidos sobre Google Maps). Verticales = sentido río; horizontales = paralelas al río */
+var VS=[[20,"ITUZAINGÓ"],[39,"GRAL. PINTO"],[58,"QUIRNO COSTA"],[77,"25 DE MAYO"],[96,"SARMIENTO"],[115,"JUAN N. MADERO",110],[134,"9 DE JULIO"],[153,"ADOLFO ALSINA"],[172,"AYACUCHO"]];
+var HS=[[35,""],[54,""],[73,"V. SERVETTO",{lx:[164.5]}],[92,"H. VIEYTES",{skip:[100,133]}],[111,"ESCALADA"],[131,"GRAL. ARIAS"],[151,"SAN GINÉS"],[170,"AV. DEL LIBERTADOR",{av:1,lx:[69.5,164.5]}],[190,""],[210,"CONSTITUCIÓN"],[229,"3 DE FEBRERO"],[248,"GRAL. LAVALLE"],[266,"BELGRANO"],[289,"BRANDSEN"]];
+var RAILS=[[119,"TREN DE LA COSTA"],[275,"TREN MITRE"]];
+
+/* ===== UTILS / PROGRESO ===== */
+var W=192,H=300;
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return String(s).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t}return b}
+function stars(n){return '★★★'.slice(0,n)+'☆☆☆'.slice(0,3-n)}
+var P={stars:{},demo:false};
+try{var s=localStorage.getItem('sfw_progress');if(s)P=JSON.parse(s)||P;P.stars=P.stars||{}}catch(e){}
+function save(){try{localStorage.setItem('sfw_progress',JSON.stringify(P))}catch(e){}}
+function unlocked(i){return P.demo||i===0||(P.stars[LEVELS[i-1].n]||0)>=1}
+function currentIdx(){for(var i=0;i<LEVELS.length;i++){if(!((P.stars[LEVELS[i].n]||0)>=1))return i}return LEVELS.length-1}
+var toastT;function toast(m){var t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove('on')},2200)}
+
+/* ===== MAPA PIXEL ===== */
+var X=$('map').getContext('2d');
+function R(x,y,w,h,c){X.fillStyle=c;X.fillRect(Math.round(x),Math.round(y),w,h)}
+function rng(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+var GRASS='#7cc45a',ROAD='#4b5260',SIDE='#c9ced6',WATER='#2b7bd6',WATER2='#5aa2ea',SAND='#e8d7a0',WALL='#f3e9d2';
+var ROOFS=['#E89000','#d9534f','#b03a2e','#2868A8','#8e6e53','#E09030','#c0392b'];
+function hRects(h){var y=h[0],o=h[2]||{},hh=o.av?8:6,x0=o.x0||0;if(o.skip)return[[x0,y-1,o.skip[0]-x0,hh],[o.skip[1],y-1,W-o.skip[1],hh]];return[[x0,y-1,W-x0,hh]]}
+function vRect(v){var y0=v[2]||14;return[v[0]-1,y0,6,H-y0]}
+var SRECTS=[[0,0,W,14]];HS.forEach(function(h){SRECTS=SRECTS.concat(hRects(h))});VS.forEach(function(v){SRECTS.push(vRect(v))});RAILS.forEach(function(r){SRECTS.push([0,r[0],W,6])});
+var RES=[[82,12,12,70],[101,76,32,33],[101,215,13,13],[120,215,13,13],[86,253,9,12],[101,125,12,5],[139,281,13,7]];
+function hit(list,x,y,w,h){for(var i=0;i<list.length;i++){var r=list[i];if(x<r[0]+r[2]&&x+w>r[0]&&y<r[1]+r[3]&&y+h>r[1])return true}return false}
+function house(x,y,c){R(x,y,5,2,c);R(x,y+2,5,3,WALL);R(x,y+1,5,1,'rgba(0,0,0,.15)');R(x+2,y+3,1,2,'#6d4c41');R(x+4,y+3,1,1,'#7fb3e0')}
+function tree(x,y){R(x+1,y,3,1,'#43a047');R(x,y+1,5,2,'#2e7d32');R(x+1,y+1,2,1,'#66bb6a');R(x+2,y+3,1,2,'#6d4c41')}
+function tiny(x,y){R(x,y,3,2,'#2e7d32');R(x+1,y,1,1,'#66bb6a')}
+function outline(x,y,w,h,c){R(x,y,w,1,c);R(x,y+h-1,w,1,c);R(x,y,1,h,c);R(x+w-1,y,1,h,c)}
+function shed(x,y,w,h){R(x,y,w,h,'#9aa3ad');R(x,y,w,1,'#6b7480');for(var i=1;i<w-1;i+=3)R(x+i,y+1,2,1,'#c5ccd3');R(x+2,y+h-3,3,3,'#4b5260')}
+
+function drawMap(){
+ var rnd=rng(1806),i,x,y,k;
+ R(0,0,W,H,GRASS);for(i=0;i<700;i++)R(rnd()*W|0,rnd()*H|0,1,1,rnd()<.6?'#6ab04c':'#8fd16a');
+ // manzanas: casas en la grilla real; galpones en la zona industrial
+ var cols=[-6].concat(VS.map(function(v){return v[0]-1}),[W]);
+ var rows=[[0,14]];HS.forEach(function(h){rows.push([h[0]-1,(h[2]&&h[2].av)?8:6])});RAILS.forEach(function(r){rows.push([r[0],6])});rows.push([H,0]);rows.sort(function(a,b){return a[0]-b[0]});
+ for(var c=0;c<cols.length-1;c++){var xa=cols[c]+6,xb=cols[c+1];
+  for(var r=0;r<rows.length-1;r++){var ya=rows[r][0]+rows[r][1],yb=rows[r+1][0];if(yb-ya<5)continue;
+   if(xa>=135&&yb<=112&&ya>=14){shed(xa+1,ya+1,xb-xa-2,yb-ya-2);continue}
+   for(y=ya;y+5<=yb;y+=6)for(x=xa;x+5<=xb;x+=6){if(hit(SRECTS,x,y,5,5)||hit(RES,x,y,5,5))continue;var q=rnd();if(q<.72)house(x,y,ROOFS[Math.floor(rnd()*ROOFS.length)]);else if(q<.9)tree(x,y)}}}
+ // calles: veredas y asfalto
+ HS.forEach(function(h){hRects(h).forEach(function(r){R(r[0],r[1],r[2],r[3],SIDE)})});VS.forEach(function(v){var r=vRect(v);R(r[0],r[1],r[2],r[3],SIDE)});
+ HS.forEach(function(h){hRects(h).forEach(function(r){R(r[0],r[1]+1,r[2],r[3]-2,ROAD)})});VS.forEach(function(v){var r=vRect(v);R(r[0]+1,r[1],r[2]-2,r[3],ROAD)});
+ // Av. del Libertador: doble línea amarilla y sendas peatonales
+ for(x=0;x<W;x+=6){if(VS.some(function(v){return x+3>v[0]-4&&x<v[0]+7}))continue;R(x,172,3,1,'#f4d03f')}
+ VS.forEach(function(v){for(k=0;k<3;k++){R(v[0]-4,170+k*2,2,1,'#fff');R(v[0]+5,170+k*2,2,1,'#fff')}});
+ // río Luján y delta
+ R(0,0,W,4,'#6ab04c');for(x=2;x<W;x+=11)tiny(x,0);R(0,4,W,8,WATER);for(i=0;i<60;i++)R(rnd()*W|0,5+rnd()*6|0,3,1,WATER2);R(0,12,W,2,SAND);
+ // dársena / clubes náuticos
+ R(82,12,12,68,WATER);for(i=0;i<16;i++)R(83+rnd()*9|0,14+rnd()*64|0,2,1,WATER2);R(81,14,1,66,'#8d6e63');R(94,14,1,66,'#8d6e63');
+ [[84,26],[89,46],[84,62]].forEach(function(b){R(b[0],b[1],4,2,'#fff');R(b[0]+1,b[1]-1,2,1,'#E89000')});
+ // canchas junto al Tren de la Costa
+ R(101,76,32,33,'#5fae4a');[[103,78],[103,94]].forEach(function(f){for(k=0;k<7;k++)R(f[0]+k*4,f[1],2,13,'#6cbd55');outline(f[0],f[1],28,13,'#fff');R(f[0]+14,f[1],1,13,'#fff')});
+ // vías: Tren de la Costa y Mitre, con pasos a nivel
+ RAILS.forEach(function(rl){var y=rl[0];R(0,y,W,6,'#a1a1a1');for(x=0;x<W;x+=3)R(x,y,1,6,'#6d4c41');R(0,y+1,W,1,'#424242');R(0,y+4,W,1,'#424242');
+  VS.forEach(function(v){if((v[2]||14)>y)return;R(v[0],y,4,6,ROAD);R(v[0],y+1,4,1,'#757575');R(v[0],y+4,4,1,'#757575');R(v[0]-2,y-2,2,1,'#e53935');R(v[0]+4,y+7,2,1,'#e53935')})});
+ // Plaza Bartolomé Mitre: senderos diagonales y rotonda central
+ R(101,215,13,13,'#8fd16a');for(i=0;i<13;i++){R(101+i,215+i,1,1,SAND);R(113-i,215+i,1,1,SAND)}
+ for(var dy=-3;dy<=3;dy++)for(var dx=-3;dx<=3;dx++){var d=Math.round(Math.sqrt(dx*dx+dy*dy));if(d===3)R(107+dx,221+dy,1,1,SAND)}R(107,221,1,1,'#9e9e9e');
+ tiny(102,220);tiny(110,220);tiny(106,216);tiny(106,225);
+ // Municipalidad (Madero y Constitución) y Honorable Concejo Deliberante
+ R(120,215,9,7,WALL);R(120,215,9,2,'#2868A8');for(i=0;i<4;i++)R(121+i*2,218,1,4,'#fff');R(124,219,1,3,'#6d4c41');R(130,215,1,6,'#555');R(131,215,3,2,'#0088C8');
+ R(126,223,7,5,'#efe6d0');R(126,223,7,1,'#E89000');R(128,222,3,1,'#2868A8');R(127,225,1,1,'#7fb3e0');R(131,225,1,1,'#7fb3e0');
+ // Teatro Otamendi
+ R(86,254,9,9,'#efe6d0');R(86,254,9,2,'#7b4fa0');R(88,258,5,1,'#ffd54f');R(89,260,3,3,'#6d4c41');
+ // Estaciones
+ R(101,125,12,5,'#efe6d0');R(101,125,12,1,'#b03a2e');R(103,127,8,1,'#0088C8');
+ R(139,281,13,6,'#efe6d0');R(139,281,13,1,'#b03a2e');R(141,283,9,1,'#0088C8');R(144,284,2,3,'#6d4c41');
+ for(i=0;i<3;i++){R(128+i,270+i,1,1,'#fff');R(130-i,270+i,1,1,'#fff');R(119+i,113+i,1,1,'#fff');R(121-i,113+i,1,1,'#fff')}
+ // semáforos sobre Libertador y algunos PARE
+ VS.forEach(function(v,j){if(j%2)return;R(v[0]+5,165,1,1,'#e53935');R(v[0]+5,166,1,1,'#fdd835');R(v[0]+5,167,1,1,'#43a047')});
+ [[24,138],[62,197],[81,236],[138,158],[157,254],[43,254],[176,216],[62,138]].forEach(function(p){R(p[0],p[1],2,2,'#e53935')});
+ // camino de niveles
+ for(i=0;i<LEVELS.length-1;i++){var a=LEVELS[i],b=LEVELS[i+1],dd=Math.hypot(b.x-a.x,b.y-a.y),n=Math.floor(dd/4);
+  for(var j=1;j<n;j++){var px=a.x+(b.x-a.x)*j/n,py=a.y+(b.y-a.y)*j/n;R(px-1,py-1,3,3,'#7a5c1e');R(px,py,1,1,'#fff3c4')}}
+}
+function renderLabels(){
+ var h='';
+ function L(t,x,y,rot,cls){h+='<div class="'+(cls||'slabel')+'" style="left:'+(x/W*100)+'%;top:'+(y/H*100)+'%;transform:translate(-50%,-50%) rotate('+(rot||0)+'deg)">'+esc(t)+'</div>'}
+ HS.forEach(function(s){if(!s[1])return;var o=s[2]||{};(o.lx||[50.5,164.5]).forEach(function(x){if(o.x0&&x<o.x0)return;if(o.skip&&x>o.skip[0]&&x<o.skip[1])return;L(s[1],x,s[0]+(o.av?2.5:1.5),0,o.av?'slabel av':'slabel')})});
+ VS.forEach(function(v){[143.5,240.5].forEach(function(y){L(v[1],v[0]+1.5,y,-90)})});
+ RAILS.forEach(function(r){L(r[1],60,r[0]+3,0,'slabel rail')});
+ L('RÍO LUJÁN',140,8,0,'slabel big');L('HCD',129.5,225.5,0,'slabel poi');
+ L('▼ A PANAMERICANA',96,297,0,'slabel sign');L('◀ CARUPÁ · TIGRE',16,191.5,0,'slabel sign');L('VICTORIA ▶',178,191.5,0,'slabel sign');
+ h+='<div class="compass" style="left:'+(178/W*100)+'%;top:'+(256/H*100)+'%"><i>▲<br>N</i></div>';
+ $('labels').innerHTML=h;
+}
+function renderNodes(){
+ var box=$('nodes');box.innerHTML='';var cur=currentIdx(),total=0;
+ LEVELS.forEach(function(L,i){
+  var st=P.stars[L.n]||0;total+=st;var open=unlocked(i);
+  var b=document.createElement('button');
+  b.className='node'+(!open?' locked':(st>=1?' done':''))+(i===cur&&open?' current':'');
+  b.style.left=(L.x/W*100)+'%';b.style.top=(L.y/H*100)+'%';
+  b.textContent=open?(i===LEVELS.length-1?'★':L.n):'🔒';
+  b.setAttribute('aria-label','Nivel '+L.n+': '+L.name);
+  b.onclick=function(){openLevel(i)};box.appendChild(b);
+  var lb=document.createElement('div');lb.className='nlabel '+(L.lab||'below');lb.style.left=b.style.left;lb.style.top=b.style.top;
+  lb.innerHTML=esc(L.tag)+'<span class="nstars">'+stars(st)+'</span>';box.appendChild(lb);
+ });
+ var C=LEVELS[cur],car=$('car');car.style.left=(C.x/W*100)+'%';car.style.top=(C.y/H*100)+'%';
+ $('starbox').textContent='★ '+total+'/'+(LEVELS.length*3);
+ $('demoBtn').textContent=P.demo?'Demo: ON':'Modo demo';
+ requestAnimationFrame(clampLabels);
+}
+function clampLabels(){
+ var wrap=$('mapwrap'),wr=wrap.getBoundingClientRect(),pad=4;
+ wrap.querySelectorAll('.nlabel,.slabel.sign').forEach(function(el){el.style.marginLeft='0px';var r=el.getBoundingClientRect(),dx=0;
+  if(r.left<wr.left+pad)dx=wr.left+pad-r.left;else if(r.right>wr.right-pad)dx=wr.right-pad-r.right;if(dx)el.style.marginLeft=dx+'px'});
+}
+function scrollToCurrent(smooth){
+ var t=$('tab-mapa'),C=LEVELS[currentIdx()],h=$('mapwrap').offsetHeight;
+ var w=$('mapwrap').offsetWidth;t.scrollTo({top:Math.max(0,C.y/H*h-t.clientHeight/2),left:Math.max(0,C.x/W*w-t.clientWidth/2),behavior:smooth?'smooth':'auto'});
+}
+
+/* ===== FICHA DE NIVEL ===== */
+function openLevel(i){
+ if(!unlocked(i)){toast('Superá "'+LEVELS[i-1].name+'" para desbloquear este nivel');return}
+ var L=LEVELS[i],ch=CHAPTERS[L.cap-1],cats=L.cats||['Todos los temas'];
+ $('sheetBody').innerHTML='<div class="kicker">NIVEL '+L.n+' · '+esc(L.tag)+'</div><h2>'+esc(L.name)+'</h2><p>'+esc(L.place)+'</p>'+
+  '<div class="chips">'+cats.map(function(c){return '<span class="chip">'+esc(c)+'</span>'}).join('')+'</div>'+
+  '<p style="font-size:13px;color:var(--muted);margin-bottom:16px">'+L.qty+' preguntas · pasás con 50% · ★★★ con 90%<br>Manual: Cap. '+ch[0]+' — '+esc(ch[1])+'</p>'+
+  '<button class="btn" id="playBtn">▶ Jugar</button>'+
+  '<a class="btn sec" href="manual_del_conductor.pdf#page='+ch[2]+'" target="_blank" rel="noopener">📖 Leer Cap. '+ch[0]+' del manual</a>';
+ $('playBtn').onclick=function(){closeSheet();startQuiz('level',i)};
+ $('backdrop').classList.add('on');$('sheet').classList.add('on');
+}
+function closeSheet(){$('backdrop').classList.remove('on');$('sheet').classList.remove('on')}
+
+/* ===== MOTOR DE QUIZ ===== */
+var Q=null,comboT;
+function startQuiz(mode,i){
+ var L=mode==='level'?LEVELS[i]:null;
+ var pool=BANK.filter(function(q){return !L||!L.cats||L.cats.indexOf(q.cat)>=0});
+ var qty=mode==='sim'?20:L.qty;
+ Q={mode:mode,i:i,k:0,ok:0,streak:0,qs:shuffle(pool).slice(0,qty).map(function(q){return{q:q,order:shuffle(q.opts.map(function(_,k){return k}))}})};
+ $('qTitle').innerHTML=(mode==='sim'?'SIMULACRO':'NIVEL '+L.n+' · '+esc(L.tag))+'<small>Tránsito · Municipio de San Fernando</small>';
+ $('qFoot').style.display='';
+ $('quiz').classList.add('on');renderQ();
+}
+function renderQ(){
+ var it=Q.qs[Q.k],q=it.q;
+ $('qBar').style.width=(Q.k/Q.qs.length*100)+'%';$('qScore').textContent=(Q.k+1)+'/'+Q.qs.length;
+ var h='<div class="qcat">'+esc(String(q.cat).toUpperCase())+'</div><div class="qtext">'+esc(q.q)+'</div>';
+ if(q.img)h+='<img class="qimg" src="'+esc(q.img)+'" alt="Señal">';
+ it.order.forEach(function(o,k){h+='<button class="opt" data-k="'+k+'"><b>'+'ABCDEF'[k]+'</b><span>'+esc(q.opts[o])+'</span></button>'});
+ h+='<div class="fb" id="fb"></div><button class="btn" id="nextBtn" style="display:none"></button>';
+ var body=$('qBody');body.innerHTML=h;body.scrollTop=0;
+ body.querySelectorAll('.opt').forEach(function(b){b.onclick=function(){answer(+b.getAttribute('data-k'))}});
+ updFoot(false);
+}
+function capFor(cat){for(var i=0;i<LEVELS.length;i++){if(LEVELS[i].cats&&LEVELS[i].cats.indexOf(cat)>=0)return CHAPTERS[LEVELS[i].cap-1]}return CHAPTERS[0]}
+function updFoot(done){
+ var n=Q.qs.length,ans=Q.k+(done?1:0),q=Q.qs[Q.k].q,ch=capFor(q.cat);
+ $('stOk').textContent=Q.ok;$('stStreak').textContent=Q.streak;$('stKo').textContent=ans-Q.ok;
+ $('rCar').style.left='calc('+(ans/n)+' * (100% - 60px))';
+ var tip=$('qTip');tip.href='manual_del_conductor.pdf#page='+ch[2];tip.textContent='📖 ¿Dudás? Repasá Cap. '+ch[0]+' — '+ch[1]+' (pág. '+ch[2]+')';
+}
+function answer(k){
+ var it=Q.qs[Q.k],q=it.q,right=it.order[k]===q.a;
+ $('qBody').querySelectorAll('.opt').forEach(function(b,j){b.disabled=true;if(it.order[j]===q.a)b.classList.add('ok');else if(j===k)b.classList.add('ko')});
+ if(right){Q.ok++;Q.streak++;if(Q.streak>=3)combo(Q.streak)}else Q.streak=0;
+ updFoot(true);
+ var fb=$('fb');fb.className='fb on '+(right?'ok':'ko');
+ fb.innerHTML='<strong>'+(right?'¡BIEN!':'UPS…')+'</strong>'+(right?'':'Correcta: <b>'+esc(q.opts[q.a])+'</b><br>')+esc(q.exp);
+ var nb=$('nextBtn');nb.style.display='block';nb.textContent=Q.k<Q.qs.length-1?'Siguiente ▶':'Ver resultado';
+ nb.onclick=function(){if(Q.k<Q.qs.length-1){Q.k++;renderQ()}else finish()};
+ setTimeout(function(){nb.scrollIntoView({behavior:'smooth',block:'nearest'})},50);
+}
+function combo(n){var el=$('combo');el.textContent='COMBO x'+n+' 🔥';el.classList.remove('on');void el.offsetWidth;el.classList.add('on');clearTimeout(comboT);comboT=setTimeout(function(){el.classList.remove('on')},1300)}
+function finish(){
+ var n=Q.qs.length,pct=Q.ok/n,h;$('qBar').style.width='100%';$('qFoot').style.display='none';
+ if(Q.mode==='sim'){
+  var pass=pct>=.7;
+  h='<div class="res"><div class="px" style="font-size:9px;color:var(--orange)">SIMULACRO</div><div class="big">'+(pass?'🏆':'📘')+'</div><h2>'+(pass?'¡Aprobado!':'Todavía no')+'</h2><p>'+Q.ok+' de '+n+' correctas ('+Math.round(pct*100)+'%).<br>'+(pass?'Estás listo para el examen teórico.':'Repasá los niveles del mapa y volvé a intentarlo.')+'</p>';
+ }else{
+  var L=LEVELS[Q.i],st=pct>=.9?3:pct>=.7?2:pct>=.5?1:0,last=Q.i===LEVELS.length-1,wasLocked=!last&&!unlocked(Q.i+1);
+  P.stars[L.n]=Math.max(P.stars[L.n]||0,st);save();
+  var nowOpen=wasLocked&&unlocked(Q.i+1);
+  h='<div class="res"><div class="px" style="font-size:9px;color:var(--orange)">NIVEL '+L.n+' · '+esc(L.tag)+'</div><div class="big">'+stars(st)+'</div><h2>'+(st?(last?'¡Recorriste San Fernando!':'¡Nivel superado!'):'¡Casi!')+'</h2><p>'+Q.ok+' de '+n+' correctas ('+Math.round(pct*100)+'%).'+(nowOpen?'<br><b>Desbloqueaste: '+esc(LEVELS[Q.i+1].name)+'</b>':'')+(st?'':'<br>Necesitás 50% para avanzar.')+'</p>';
+ }
+ h+='<button class="btn" id="resMap">Volver al mapa</button><button class="btn sec" id="resAgain">Reintentar</button></div>';
+ $('qBody').innerHTML=h;var m=Q.mode,i=Q.i;
+ $('resMap').onclick=function(){closeQuiz();showTab('mapa');scrollToCurrent(true)};
+ $('resAgain').onclick=function(){startQuiz(m,i)};
+ renderNodes();
+}
+function closeQuiz(){$('quiz').classList.remove('on');renderNodes()}
+
+/* ===== SECCIONES ===== */
+function renderBib(){
+ $('bibList').innerHTML=CHAPTERS.map(function(c){var lv=LEVELS.filter(function(L){return L.cap===c[0]})[0];
+  return '<a class="card" href="manual_del_conductor.pdf#page='+c[2]+'" target="_blank" rel="noopener"><span class="n">'+c[0]+'</span><div><b>'+esc(c[1])+'</b><small>Pág. '+c[2]+(lv?' · Nivel '+lv.n+' en el mapa: '+esc(lv.name):'')+'</small></div></a>'}).join('');
+}
+function renderFaq(term){
+ var t=norm(term||'').trim(),h='';
+ var f=FAQ.filter(function(x){return !t||norm(x[0]+' '+x[1]).indexOf(t)>=0});
+ f.forEach(function(x){h+=x[2]?'<a class="card" href="'+esc(x[2])+'" target="_blank" rel="noopener"><span class="n">📅</span><div><b>'+esc(x[0])+'</b><small>'+esc(x[1])+' Tocá para ir →</small></div></a>':'<details><summary>'+esc(x[0])+'</summary><p>'+esc(x[1])+'</p></details>'});
+ if(t.length>=3){
+  var m=BANK.filter(function(q){return norm(q.q+' '+(q.exp||'')+' '+q.cat).indexOf(t)>=0}).slice(0,8);
+  if(m.length)h+='<div class="px" style="font-size:8px;color:var(--orange);margin:20px 0 12px">DEL BANCO DE PREGUNTAS</div>';
+  m.forEach(function(q){h+='<details><summary>'+esc(q.q)+'</summary><p><b>'+esc(q.opts[q.a])+'</b><br>'+esc(q.exp)+'</p></details>'});
+  if(!f.length&&!m.length)h='<p class="lead">No encontramos nada con “'+esc(term)+'”. Probá con otra palabra (ej: alcohol, casco, semáforo).</p>';
+ }
+ $('faqList').innerHTML=h;
+}
+function showTab(id){
+ document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('active',t.id==='tab-'+id)});
+ document.querySelectorAll('nav.tabs button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-tab')===id)});
+}
+
+/* ===== INIT ===== */
+drawMap();renderLabels();renderNodes();renderBib();renderFaq('');
+document.querySelectorAll('nav.tabs button').forEach(function(b){b.onclick=function(){showTab(b.getAttribute('data-tab'));if(b.getAttribute('data-tab')==='mapa')scrollToCurrent(true)}});
+$('backdrop').onclick=closeSheet;$('qClose').onclick=closeQuiz;
+$('simBtn').onclick=function(){startQuiz('sim')};
+$('faqInput').oninput=function(){renderFaq(this.value)};
+$('demoBtn').onclick=function(){P.demo=!P.demo;save();renderNodes();toast(P.demo?'Modo demo: todos los niveles abiertos':'Modo demo desactivado')};
+$('resetBtn').onclick=function(){P={stars:{},demo:false};save();renderNodes();scrollToCurrent(true);toast('Progreso reiniciado')};
+window.addEventListener('load',function(){clampLabels();scrollToCurrent(false)});
+window.addEventListener('resize',clampLabels);
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(clampLabels);
+</script>
+</body>
+</html>
