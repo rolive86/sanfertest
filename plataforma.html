@@ -179,7 +179,7 @@ details p{padding:0 12px 14px;font-size:14px;line-height:1.5;color:#33475b}
 .cam .btn.ghost{background:transparent;color:#fff;border-color:#fff;box-shadow:none}
 .cam .btn.wa{background:#25D366;border-color:#128C7E;box-shadow:4px 4px 0 #075E54}
 .cam .btn[disabled]{opacity:.45;cursor:not-allowed}
-.shot{width:100%;max-width:420px;display:block;margin:0 auto;border:3px solid #fff;border-radius:10px;image-rendering:pixelated}
+.shot{width:100%;max-width:420px;display:block;margin:0 auto;border:3px solid #fff;border-radius:10px}
 .cam input[type=text]{width:100%;margin-top:14px;border:2.5px solid #fff;border-radius:10px;padding:12px;font-family:'Archivo',sans-serif;font-size:16px;background:#12304d;color:#fff;outline:none}
 .consent{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.4;margin:14px 0 2px;color:#dbe7f2}
 .consent input{width:20px;height:20px;flex-shrink:0;margin-top:1px;accent-color:#25D366}
@@ -615,18 +615,9 @@ function startCam(){
 function stopCam(){if(camStream){camStream.getTracks().forEach(function(t){t.stop()});camStream=null}}
 function closeCam(){stopCam();$('cam').classList.remove('on')}
 function grabFace(src,w,h,mirror){
- var N=54,m=Math.min(w,h),side=m*.62,cx=(w-m)/2+m/2,cy=(h-m)/2+m*.46;
- // reducción en pasos (evita el ruido al achicar mucho de golpe)
- var sz=N*8,c=document.createElement('canvas');c.width=c.height=sz;var g=c.getContext('2d');g.imageSmoothingQuality='high';
- if(mirror){g.translate(sz,0);g.scale(-1,1)}
- g.drawImage(src,cx-side/2,cy-side/2,side,side,0,0,sz,sz);
- while(sz>N){var n=Math.max(N,sz/2),c2=document.createElement('canvas');c2.width=c2.height=n;var g2=c2.getContext('2d');g2.imageSmoothingQuality='high';g2.drawImage(c,0,0,n,n);c=c2;sz=n}
- var id=c.getContext('2d').getImageData(0,0,N,N),d=id.data,lum=[];
- for(var y=0;y<N;y++)for(var x=0;x<N;x++){var dx=x-N/2+.5,dy=y-N/2+.5;if(dx*dx+dy*dy>(N/2)*(N/2))continue;var k=(y*N+x)*4;lum.push(.299*d[k]+.587*d[k+1]+.114*d[k+2])}
- lum.sort(function(a,b){return a-b});var lo=lum[Math.floor(lum.length*.02)]||0,hi=lum[Math.floor(lum.length*.98)]||255;if(hi-lo<40){lo=Math.max(0,lo-20);hi=Math.min(255,hi+20)}
- var sc=235/(hi-lo);
- for(var i=0;i<d.length;i+=4)for(var j=0;j<3;j++){var v=(d[i+j]-lo)*sc+10;v=v<0?0:v>255?255:v;d[i+j]=Math.round(v/12)*12>255?255:Math.round(v/12)*12}
- FACE=id;stopCam();camStep(2);compose()}
+ var m=Math.min(w,h),side=m*.62,cx=(w-m)/2+m/2,cy=(h-m)/2+m*.46,sz=540,c=document.createElement('canvas');c.width=c.height=sz;var g=c.getContext('2d');
+ g.imageSmoothingEnabled=true;g.imageSmoothingQuality='high';if(mirror){g.translate(sz,0);g.scale(-1,1)}
+ g.drawImage(src,cx-side/2,cy-side/2,side,side,0,0,sz,sz);FACE=c;stopCam();camStep(2);compose()}
 function fitFont(o,txt,weight,size,family,max){while(size>18){o.font=weight+' '+size+'px '+family;if(o.measureText(txt).width<=max)break;size-=2}}
 function compose(){
  var g=LOGC.getContext('2d');function r(x,y,w,h,c){g.fillStyle=c;g.fillRect(x,y,w,h)}
@@ -648,11 +639,11 @@ function compose(){
  // bandas de marca
  r(0,0,120,30,'#0088C8');r(0,30,120,2,'#2868A8');r(0,104,120,16,'#2868A8');
  var o=OUT.getContext('2d');o.imageSmoothingEnabled=false;o.drawImage(LOGC,0,0,1080,1080);
- // cara en alta (54x54, celdas de 5px) con contorno tipo sticker; se oculta detrás de la carrocería
- if(FACE){var fd=FACE.data,FN=54,cell=5,fx=41*9,fy=40*9,R2=FN/2;
-  for(var fy2=-1;fy2<=FN;fy2++)for(var fx2=-1;fx2<=FN;fx2++){var ddx=fx2-R2+.5,ddy=fy2-R2+.5,dist=Math.sqrt(ddx*ddx+ddy*ddy),py=fy+fy2*cell;if(py+cell>71*9||dist>R2+1)continue;
-   if(dist>R2-.6){o.fillStyle='#163a5f'}else{var kk=(fy2*FN+fx2)*4;o.fillStyle='rgb('+fd[kk]+','+fd[kk+1]+','+fd[kk+2]+')'}
-   o.fillRect(fx+fx2*cell,py,cell,cell)}}
+ // foto de la cara (sin pixelar), recortada en círculo y oculta detrás de la carrocería
+ if(FACE){var fx=41*9,fy=40*9,fs=270,cxx=fx+fs/2,cyy=fy+fs/2;
+  o.save();o.beginPath();o.rect(0,0,1080,71*9);o.clip();
+  o.save();o.beginPath();o.arc(cxx,cyy,fs/2,0,Math.PI*2);o.clip();o.imageSmoothingEnabled=true;o.imageSmoothingQuality='high';o.drawImage(FACE,fx,fy,fs,fs);o.restore();
+  o.beginPath();o.arc(cxx,cyy,fs/2,0,Math.PI*2);o.lineWidth=10;o.strokeStyle='#163a5f';o.stroke();o.restore();o.imageSmoothingEnabled=false}
  var total=0;LEVELS.forEach(function(L){total+=P.stars[L.n]||0});
  o.textBaseline='alphabetic';o.textAlign='left';
  o.fillStyle='#E89000';o.font='24px "Press Start 2P"';o.fillText('MUNICIPIO DE SAN FERNANDO',56,70);
