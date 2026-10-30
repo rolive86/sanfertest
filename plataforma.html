@@ -139,6 +139,31 @@ details p{padding:0 12px 14px;font-size:14px;line-height:1.5;color:#33475b}
 .ask input{width:100%;border:2.5px solid var(--blue);border-radius:10px;padding:13px 12px;font-family:'Archivo',sans-serif;font-size:16px;margin-bottom:16px;box-shadow:var(--px);outline:none}
 .simbox{border:3px solid var(--blue-dk);box-shadow:4px 4px 0 var(--orange);border-radius:14px;padding:18px;margin:12px 0 20px}
 .simbox ul{margin:10px 0 0 18px;font-size:14px;line-height:1.8}
+.help{flex-shrink:0;width:32px;height:32px;border-radius:6px;background:#fff;color:var(--blue-dk);border:2px solid var(--blue-dk);box-shadow:2px 2px 0 var(--orange);font-family:'Press Start 2P',monospace;font-size:11px;cursor:pointer;padding:0}
+.car.driving{animation:rumble .14s steps(2) infinite}
+@keyframes rumble{50%{margin-top:-1px}}
+.tut{position:absolute;inset:0;background:rgba(10,30,50,.62);z-index:50;display:none;align-items:center;justify-content:center;padding:18px}
+.tut.on{display:flex}
+.tut-card{background:#fff;border:3px solid var(--blue-dk);box-shadow:5px 5px 0 var(--orange);border-radius:16px;padding:22px 18px 16px;width:100%;max-width:380px;position:relative;animation:tutIn .25s ease-out}
+@keyframes tutIn{from{transform:translateY(16px) scale(.96);opacity:0}to{transform:none;opacity:1}}
+.tut-skip{position:absolute;top:10px;right:12px;background:none;border:0;color:var(--muted);font-weight:800;font-size:13px;cursor:pointer;text-decoration:underline;font-family:'Archivo',sans-serif}
+.tut-art{height:130px;display:flex;align-items:center;justify-content:center;gap:14px;margin:8px 0 12px;background:#eef6fc;border-radius:12px;border:2px dashed #c8d4e0;overflow:hidden;position:relative}
+.tut-k{font-family:'Press Start 2P',monospace;font-size:8px;color:var(--orange)}
+.tut-card h3{font-size:21px;font-weight:900;color:var(--blue-dk);margin:7px 0 6px;letter-spacing:-.3px}
+.tut-card p{font-size:14.5px;line-height:1.5;color:#33475b;min-height:66px}
+.tut-dots{display:flex;gap:6px;justify-content:center;margin:14px 0}
+.tut-dots i{width:8px;height:8px;background:#c8d4e0;display:block}
+.tut-dots i.on{background:var(--orange);width:18px}
+.tut-nav{display:grid;grid-template-columns:1fr 1.5fr;gap:10px}
+.tut-nav .btn{padding:12px 8px;font-size:14px;margin:0}
+.tut-nav .btn[disabled]{opacity:.35;cursor:default}
+.lg{display:flex;flex-direction:column;align-items:center;gap:8px}
+.lg .node{position:static;transform:none;animation:none}
+.lg small{font-size:11px;font-weight:800;color:var(--blue-dk)}
+.tut-art .road{width:86%}
+.tut-art .rcar{animation:drive 2.6s linear infinite}
+@keyframes drive{from{left:0}to{left:calc(100% - 64px)}}
+.tabsdemo{display:flex;gap:16px}.tabsdemo div{display:flex;flex-direction:column;align-items:center;font-size:11px;font-weight:800;color:var(--blue-dk);gap:4px}.tabsdemo span{font-size:28px}
 .toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:13px;font-weight:700;padding:10px 14px;border-radius:10px;z-index:40;display:none;width:max-content;max-width:88%;text-align:center}
 .toast.on{display:block}
 </style>
@@ -149,6 +174,7 @@ details p{padding:0 12px 14px;font-size:14px;line-height:1.5;color:#33475b}
     <img src="assets/sanfer-isotipo.png" alt="San Fernando">
     <div class="brand-t"><span>MUNICIPIO DE SAN FERNANDO</span><b>Tránsito</b></div>
     <div class="starbox" id="starbox">★ 0/24</div>
+    <button class="help" id="helpBtn" aria-label="Cómo se juega">?</button>
   </header>
   <main>
     <section class="tab active" id="tab-mapa">
@@ -211,6 +237,13 @@ details p{padding:0 12px 14px;font-size:14px;line-height:1.5;color:#33475b}
     <div class="combo" id="combo"></div>
   </div>
   <div class="toast" id="toast"></div>
+  <div class="tut" id="tut"><div class="tut-card">
+    <button class="tut-skip" id="tutSkip">Omitir</button>
+    <div class="tut-art" id="tutArt"></div>
+    <div class="tut-k" id="tutK"></div><h3 id="tutH"></h3><p id="tutP"></p>
+    <div class="tut-dots" id="tutDots"></div>
+    <div class="tut-nav"><button class="btn sec" id="tutPrev">◀ Atrás</button><button class="btn" id="tutNext">Siguiente ▶</button></div>
+  </div></div>
 </div>
 <script src="bank_actualizado.js"></script>
 <script>
@@ -326,12 +359,24 @@ function carDeg(dx,dy){return Math.abs(dx)>Math.abs(dy)?(dx>0?0:180):(dy>0?90:-9
 function setCar(pt,deg){var c=$('car');c.style.left=(pt[0]/W*100)+'%';c.style.top=(pt[1]/H*100)+'%';c.firstElementChild.style.transform=deg===180?'scaleX(-1)':'rotate('+deg+'deg)'}
 function stopDeg(i){var A=stopInfo(LEVELS[i].st);return A.isV?(A.S.dir==='up'?-90:90):(A.S.dir==='left'?180:0)}
 function placeCar(i){var c=$('car');c.style.transition='none';setCar(stopInfo(LEVELS[i].st).pt,stopDeg(i))}
-function animateCar(i,j,done){
- var pts=ROUTES[i]||route(i,j),k=1,c=$('car');placeCar(i);void c.offsetWidth;
- (function step(){if(k>=pts.length){c.style.transition='none';setCar(pts[pts.length-1],stopDeg(j));if(done)done();return}
-  var a=pts[k-1],b=pts[k],d=Math.hypot(b[0]-a[0],b[1]-a[1]),ms=Math.max(120,d*26);
-  c.style.transition='left '+ms+'ms linear, top '+ms+'ms linear';setCar(b,carDeg(b[0]-a[0],b[1]-a[1]));k++;setTimeout(step,ms)})();
+var BASE=null,CARAT=null,ANIM_IDX=-1,MAPIMG='';
+function done_(i){return (P.stars[LEVELS[i].n]||0)>=1}
+function drawProgress(){if(!BASE)return;X.putImageData(BASE,0,0);for(var i=0;i<LEVELS.length-1;i++)if(done_(i)&&i!==ANIM_IDX)dotsAlong(ROUTES[i])}
+function paintSeg(a,b,ms){var d=Math.hypot(b[0]-a[0],b[1]-a[1]),n=Math.max(1,Math.floor(d/4)),j=0,iv=setInterval(function(){if(j>=n){clearInterval(iv);return}R(a[0]+(b[0]-a[0])*j/n-1,a[1]+(b[1]-a[1])*j/n-1,2,2,'#fff3c4');j++},ms/n)}
+function driveRoute(pts,endDeg,paint,speed,done){
+ var k=1,c=$('car');CAR_ANIM=true;c.style.transition='none';
+ setCar(pts[0],pts.length>1?carDeg(pts[1][0]-pts[0][0],pts[1][1]-pts[0][1]):endDeg);void c.offsetWidth;c.classList.add('driving');
+ (function step(){if(k>=pts.length){c.style.transition='none';setCar(pts[pts.length-1],endDeg);c.classList.remove('driving');CAR_ANIM=false;if(done)done();return}
+  var a=pts[k-1],b=pts[k],d=Math.hypot(b[0]-a[0],b[1]-a[1]),ms=Math.max(80,d*speed);
+  c.style.transition='left '+ms+'ms linear, top '+ms+'ms linear';setCar(b,carDeg(b[0]-a[0],b[1]-a[1]));
+  if(paint)paintSeg(a,b,ms);k++;setTimeout(step,ms)})();
 }
+function animateCar(i,j,done){ANIM_IDX=i;driveRoute(ROUTES[i]||route(i,j),stopDeg(j),true,15,function(){ANIM_IDX=-1;CARAT=j;drawProgress();if(done)done()})}
+function tapLevel(i){
+ if(!unlocked(i)||CAR_ANIM){if(!CAR_ANIM)openLevel(i);return}
+ if(CARAT!==null&&CARAT!==i){var from=CARAT;driveRoute(route(from,i),stopDeg(i),false,7,function(){CARAT=i;openLevel(i)})}else{CARAT=i;openLevel(i)}
+}
+
 
 function drawMap(){
  var rnd=rng(1806),i,x,y,k;
@@ -376,7 +421,7 @@ function drawMap(){
  VS.forEach(function(v,j){if(j%2)return;R(v[0]+5,165,1,1,'#e53935');R(v[0]+5,166,1,1,'#fdd835');R(v[0]+5,167,1,1,'#43a047')});
  [[24,138],[62,197],[81,236],[138,158],[157,254],[43,254],[176,216],[62,138]].forEach(function(p){R(p[0],p[1],2,2,'#e53935')});
  // flechas de mano y recorrido por calles
- GEO=buildGeo();drawArrows();ROUTES=[];for(i=0;i<LEVELS.length-1;i++){var rt=route(i,i+1);ROUTES.push(rt);dotsAlong(rt)}
+ GEO=buildGeo();drawArrows();ROUTES=[];for(i=0;i<LEVELS.length-1;i++)ROUTES.push(route(i,i+1))
 }
 function renderLabels(){
  var h='';
@@ -398,11 +443,12 @@ function renderNodes(){
   b.style.left=(L.x/W*100)+'%';b.style.top=(L.y/H*100)+'%';
   b.textContent=open?(i===LEVELS.length-1?'★':L.n):'🔒';
   b.setAttribute('aria-label','Nivel '+L.n+': '+L.name);
-  b.onclick=function(){openLevel(i)};box.appendChild(b);
+  b.onclick=function(){tapLevel(i)};box.appendChild(b);
   var lb=document.createElement('div');lb.className='nlabel '+(L.lab||'below');lb.style.left=b.style.left;lb.style.top=b.style.top;
   lb.innerHTML=esc(L.tag)+'<span class="nstars">'+stars(st)+'</span>';box.appendChild(lb);
  });
- if(!CAR_ANIM)placeCar(cur);
+ if(!CAR_ANIM){if(CARAT===null||!unlocked(CARAT))CARAT=cur;placeCar(CARAT)}
+ drawProgress();
  $('starbox').textContent='★ '+total+'/'+(LEVELS.length*3);
  $('demoBtn').textContent=P.demo?'Demo: ON':'Modo demo';
  requestAnimationFrame(clampLabels);
@@ -434,7 +480,7 @@ function closeSheet(){$('backdrop').classList.remove('on');$('sheet').classList.
 /* ===== MOTOR DE QUIZ ===== */
 var Q=null,comboT;
 function startQuiz(mode,i){
- var L=mode==='level'?LEVELS[i]:null;
+ var L=mode==='level'?LEVELS[i]:null;if(L)CARAT=i;
  var pool=BANK.filter(function(q){return !L||!L.cats||L.cats.indexOf(q.cat)>=0});
  var qty=mode==='sim'?20:L.qty;
  Q={mode:mode,i:i,k:0,ok:0,streak:0,qs:shuffle(pool).slice(0,qty).map(function(q){return{q:q,order:shuffle(q.opts.map(function(_,k){return k}))}})};
@@ -485,7 +531,7 @@ function finish(){
  }
  h+='<button class="btn" id="resMap">Volver al mapa</button><button class="btn sec" id="resAgain">Reintentar</button></div>';
  $('qBody').innerHTML=h;var m=Q.mode,i=Q.i;
- $('resMap').onclick=function(){if(animFrom!==null){CAR_ANIM=true;placeCar(animFrom)}closeQuiz();showTab('mapa');scrollToCurrent(true);if(animFrom!==null)setTimeout(function(){animateCar(animFrom,animFrom+1,function(){CAR_ANIM=false})},450)};
+ $('resMap').onclick=function(){if(animFrom!==null){CAR_ANIM=true;ANIM_IDX=animFrom;placeCar(animFrom)}closeQuiz();showTab('mapa');scrollToCurrent(true);if(animFrom!==null)setTimeout(function(){animateCar(animFrom,animFrom+1)},450)};
  $('resAgain').onclick=function(){startQuiz(m,i)};
  renderNodes();
 }
@@ -513,15 +559,34 @@ function showTab(id){
  document.querySelectorAll('nav.tabs button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-tab')===id)});
 }
 
+/* ===== GUÍA DE USO ===== */
+var CARSVG='<svg width="60" height="40" viewBox="0 0 12 8" shape-rendering="crispEdges"><rect x="3" y="0" width="6" height="3" fill="#2868A8"/><rect x="4" y="1" width="2" height="2" fill="#bfe3ff"/><rect x="7" y="1" width="1" height="2" fill="#bfe3ff"/><rect x="0" y="3" width="12" height="3" fill="#E89000"/><rect x="11" y="3" width="1" height="1" fill="#ffe082"/><rect x="0" y="5" width="12" height="1" fill="#2868A8"/><rect x="2" y="6" width="2" height="2" fill="#111"/><rect x="8" y="6" width="2" height="2" fill="#111"/></svg>';
+var TUT=[
+ {k:'BIENVENIDO',h:'Aprendé tránsito jugando',p:'Recorré las calles reales del centro de San Fernando y aprendé las normas de tránsito, nivel por nivel.',art:function(){return '<img src="assets/sanfer-isotipo.png" alt="" style="height:80px">'+CARSVG}},
+ {k:'EL MAPA',h:'Tu ciudad, en pixel',p:'Es el centro de San Fernando, con el Río Luján arriba. Las calles tienen su nombre real y flechitas blancas que marcan el sentido de circulación.',art:function(){return MAPIMG?'<img src="'+MAPIMG+'" alt="" style="width:100%;height:100%;object-fit:cover;object-position:50% 72%;image-rendering:pixelated">':''}},
+ {k:'LOS NIVELES',h:'Cada círculo es un lugar real',p:'Municipalidad, estaciones, la plaza… Tocá un círculo para ver de qué trata y jugar. Se desbloquean en orden.',art:function(){return '<div class="lg"><span class="node">1</span><small>Para jugar</small></div><div class="lg"><span class="node done">2</span><small>Superado</small></div><div class="lg"><span class="node locked">🔒</span><small>Bloqueado</small></div>'}},
+ {k:'TU AUTO',h:'Manejá por las calles',p:'Al superar un nivel, tu auto maneja hasta el siguiente respetando la mano de cada calle, y el camino recorrido queda marcado en el mapa.',art:function(){return '<div class="road"><div class="goal"></div><div class="rcar">'+CARSVG.replace('width="60" height="40"','width="48" height="32"')+'</div></div>'}},
+ {k:'CÓMO SE JUEGA',h:'8 preguntas por nivel',p:'Elegí una respuesta y te explicamos por qué. Con 50% pasás de nivel y con 90% ganás las 3 estrellas. Varias seguidas suman combo 🔥',art:function(){return '<div class="opt ok" style="width:86%;margin:0;pointer-events:none"><b>A</b><span>¡Respuesta correcta! ★★★</span></div>'}},
+ {k:'MÁS PARA VOS',h:'Estudiá y practicá',p:'Abajo tenés la Biblioteca con el Manual del Conductor, Preguntá para dudas y turnos, y el Simulacro con el formato del examen teórico.',art:function(){return '<div class="tabsdemo"><div><span>📖</span>Biblioteca</div><div><span>💬</span>Preguntá</div><div><span>📝</span>Simulacro</div></div>'}},
+ {k:'¡A LA CALLE!',h:'Empezá por la Municipalidad',p:'Ahí arranca el trámite de la licencia. Podés volver a ver esta guía cuando quieras con el botón ? de arriba.',art:function(){return '<div class="lg"><span class="node" style="width:44px;height:44px;font-size:16px">1</span><small>MUNICIPALIDAD</small></div>'+CARSVG}}
+];
+var TI=0;
+function showTut(i){TI=i;var t=TUT[i];$('tutK').textContent=t.k+' · '+(i+1)+'/'+TUT.length;$('tutH').textContent=t.h;$('tutP').textContent=t.p;$('tutArt').innerHTML=t.art();
+ $('tutDots').innerHTML=TUT.map(function(_,j){return '<i class="'+(j===i?'on':'')+'"></i>'}).join('');
+ $('tutPrev').disabled=i===0;$('tutNext').textContent=i===TUT.length-1?'¡Empezar!':'Siguiente ▶';$('tutSkip').style.visibility=i===TUT.length-1?'hidden':'visible';
+ var c=document.querySelector('.tut-card');c.style.animation='none';void c.offsetWidth;c.style.animation='';$('tut').classList.add('on')}
+function closeTut(){$('tut').classList.remove('on');P.tutSeen=true;save();showTab('mapa');scrollToCurrent(true)}
 /* ===== INIT ===== */
-drawMap();renderLabels();renderNodes();renderBib();renderFaq('');
+drawMap();BASE=X.getImageData(0,0,W,H);try{MAPIMG=$('map').toDataURL()}catch(e){}renderLabels();renderNodes();renderBib();renderFaq('');
 document.querySelectorAll('nav.tabs button').forEach(function(b){b.onclick=function(){showTab(b.getAttribute('data-tab'));if(b.getAttribute('data-tab')==='mapa')scrollToCurrent(true)}});
 $('backdrop').onclick=closeSheet;$('qClose').onclick=closeQuiz;
 $('simBtn').onclick=function(){startQuiz('sim')};
 $('faqInput').oninput=function(){renderFaq(this.value)};
 $('demoBtn').onclick=function(){P.demo=!P.demo;save();renderNodes();toast(P.demo?'Modo demo: todos los niveles abiertos':'Modo demo desactivado')};
-$('resetBtn').onclick=function(){P={stars:{},demo:false};save();renderNodes();scrollToCurrent(true);toast('Progreso reiniciado')};
-window.addEventListener('load',function(){clampLabels();scrollToCurrent(false)});
+$('resetBtn').onclick=function(){P={stars:{},demo:false,tutSeen:true};CARAT=null;save();renderNodes();scrollToCurrent(true);toast('Progreso reiniciado')};
+window.addEventListener('load',function(){clampLabels();scrollToCurrent(false);if(!P.tutSeen)showTut(0)});
+$('helpBtn').onclick=function(){showTut(0)};$('tutSkip').onclick=closeTut;
+$('tutNext').onclick=function(){if(TI<TUT.length-1)showTut(TI+1);else closeTut()};$('tutPrev').onclick=function(){if(TI>0)showTut(TI-1)};
 window.addEventListener('resize',clampLabels);
 if(document.fonts&&document.fonts.ready)document.fonts.ready.then(clampLabels);
 </script>
