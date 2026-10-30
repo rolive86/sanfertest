@@ -270,10 +270,9 @@ details p{padding:0 12px 14px;font-size:14px;line-height:1.5;color:#33475b}
       <div id="camStep2" style="display:none">
         <img class="shot" id="camShot" alt="Tu foto de conductor">
         <input id="camName" type="text" maxlength="18" placeholder="Tu nombre (opcional)" autocomplete="off">
-        <label class="consent"><input type="checkbox" id="camOk"><span>Autorizo al Municipio de San Fernando a publicar esta imagen en sus redes sociales.</span></label>
-        <button class="btn" id="camSave">1 · Guardar mi foto</button>
-        <button class="btn wa" id="camWa" disabled>2 · Enviarla al Municipio por WhatsApp</button>
-        <p class="steps">Se abre el chat del Municipio: adjuntá la foto que guardaste y enviala.</p>
+        <button class="btn wa" id="camWa">📲 Enviar al Municipio por WhatsApp</button>
+        <p class="steps">Elegí <b>WhatsApp</b> y el chat del Municipio: la foto y el mensaje van juntos.<br>¿No encontrás el chat? <a id="camWaLink" href="#" target="_blank" rel="noopener" style="color:#7ee2a8;font-weight:800">Abrilo acá</a> y adjuntá la foto guardada.</p>
+        <button class="btn ghost" id="camSave">⬇️ Guardar mi foto</button>
         <button class="btn ghost" id="camRetry">↺ Sacar otra foto</button>
       </div>
     </div>
@@ -654,16 +653,20 @@ function compose(){
  o.fillStyle='#fff';o.font='900 54px Archivo';o.fillText('Tránsito',186,1000);o.fillStyle='#dcecfa';o.font='600 28px Archivo';o.fillText('Estudiá para la licencia jugando',186,1042);
  o.textAlign='right';o.fillStyle='#ffd54f';o.font='800 40px Archivo';o.fillText('★ '+total+'/'+(LEVELS.length*3),1030,1012);o.textAlign='left';
  o.strokeStyle='#2868A8';o.lineWidth=16;o.strokeRect(8,8,1064,1064);
- $('camShot').src=OUT.toDataURL('image/jpeg',.92);
+ $('camShot').src=OUT.toDataURL('image/jpeg',.92);prepFile();
 }
 function composeWhenReady(){var f=document.fonts&&document.fonts.load?Promise.all([document.fonts.load('24px "Press Start 2P"'),document.fonts.load('900 60px Archivo'),document.fonts.load('600 28px Archivo')]):Promise.resolve();f.then(compose,compose)}
-function saveShot(){OUT.toBlob(function(b){var name='mi-foto-transito-sanfernando.jpg',file=null;try{file=new File([b],name,{type:'image/jpeg'})}catch(e){}
- if(file&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Tránsito · Municipio de San Fernando'}).catch(function(){})}
- else{var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500)}
- toast('¡Foto guardada! Ahora enviala al Municipio')},'image/jpeg',.92)}
-function sendWa(){if(!$('camOk').checked){toast('Marcá la autorización para enviarla');return}
- var n=($('camName').value||'').trim(),t='¡Hola! Terminé el juego de Tránsito del Municipio de San Fernando 🚗'+(n?' Soy '+n+'.':'')+' Les mando mi foto de conductor y autorizo a publicarla en sus redes.';
- window.open('https://wa.me/'+WA_MUNI+'?text='+encodeURIComponent(t),'_blank')}
+var LASTBLOB=null,LASTFILE=null;
+function waText(){var n=($('camName').value||'').trim();return '¡Hola! Terminé el juego de Tránsito del Municipio de San Fernando 🚗'+(n?' Soy '+n+'.':'')+' Les mando mi foto de conductor y autorizo a publicarla en sus redes.'}
+function waUrl(){return 'https://wa.me/'+WA_MUNI+'?text='+encodeURIComponent(waText())}
+function prepFile(){OUT.toBlob(function(b){LASTBLOB=b;try{LASTFILE=new File([b],'mi-foto-transito-sanfernando.jpg',{type:'image/jpeg'})}catch(e){LASTFILE=null}},'image/jpeg',.92);var l=$('camWaLink');if(l)l.href=waUrl()}
+function canShareFile(){return LASTFILE&&navigator.canShare&&navigator.canShare({files:[LASTFILE]})}
+function download(){if(!LASTBLOB)return;var a=document.createElement('a');a.href=URL.createObjectURL(LASTBLOB);a.download='mi-foto-transito-sanfernando.jpg';document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1500)}
+function saveShot(){if(!LASTBLOB){toast('Un segundo, preparando la foto…');return}
+ if(canShareFile())navigator.share({files:[LASTFILE],title:'Tránsito · Municipio de San Fernando'}).catch(function(){});else{download();toast('¡Foto guardada!')}}
+function sendWa(){if(!LASTBLOB){toast('Un segundo, preparando la foto…');return}
+ if(canShareFile()){navigator.share({files:[LASTFILE],text:waText()}).catch(function(){})}
+ else{download();window.open(waUrl(),'_blank');toast('Adjuntá en el chat la foto que se descargó')}}
 /* ===== GUÍA DE USO ===== */
 var CARSVG='<svg width="60" height="40" viewBox="0 0 12 8" shape-rendering="crispEdges"><rect x="3" y="0" width="6" height="3" fill="#2868A8"/><rect x="4" y="1" width="2" height="2" fill="#bfe3ff"/><rect x="7" y="1" width="1" height="2" fill="#bfe3ff"/><rect x="0" y="3" width="12" height="3" fill="#E89000"/><rect x="11" y="3" width="1" height="1" fill="#ffe082"/><rect x="0" y="5" width="12" height="1" fill="#2868A8"/><rect x="2" y="6" width="2" height="2" fill="#111"/><rect x="8" y="6" width="2" height="2" fill="#111"/></svg>';
 var TUT=[
@@ -695,7 +698,6 @@ window.addEventListener('load',function(){clampLabels();scrollToCurrent(false);
  if(!P.tutSeen)showTut(0)});
 $('helpBtn').onclick=function(){showTut(0)};
 $('camClose').onclick=closeCam;$('camRetry').onclick=openCam;$('camSave').onclick=saveShot;$('camWa').onclick=sendWa;
-$('camOk').onchange=function(){$('camWa').disabled=!this.checked};
 $('camName').oninput=function(){if(FACE)compose()};
 $('camShoot').onclick=function(){var v=$('camVideo');if(!camStream||!v.videoWidth){toast('La cámara todavía no está lista');return}grabFace(v,v.videoWidth,v.videoHeight,true);composeWhenReady()};
 $('camFile').onchange=function(){var f=this.files&&this.files[0];if(!f)return;var img=new Image();img.onload=function(){grabFace(img,img.naturalWidth,img.naturalHeight,false);composeWhenReady();URL.revokeObjectURL(img.src)};img.src=URL.createObjectURL(f);this.value=''};$('tutSkip').onclick=closeTut;
